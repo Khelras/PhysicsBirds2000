@@ -1,0 +1,23 @@
+### Windows
+# Windows thumbnail cache files
+Thumbs.db
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows shortcuts
+*.lnk
+
+### VisualStudio
+# User-specific files
+*.suo
+*.user
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
