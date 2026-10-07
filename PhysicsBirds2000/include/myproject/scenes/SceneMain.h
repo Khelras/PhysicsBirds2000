@@ -11,7 +11,13 @@ Mail        : angelo.bohol@mds.ac.nz
 **************************************************************************/
 
 #pragma once
+#include <memory>
+#include <SFML/System/Clock.hpp>
 #include "Scene.h"
+
+// Forward Declarations
+class b2World;
+class b2Body;
 
 /// <summary>
 ///     The main scene which derives from the base scene class.
@@ -20,7 +26,10 @@ class SceneMain : public Scene
 {
 protected:
     // -- Main Scene Properties -- //
-    
+    std::unique_ptr<b2World> m_world; // Box2D World for Physics Simulation
+    b2Body* m_ballBody; // Box2D Body for the Ball
+    b2Body* m_wallBody; // Box2D Body for the Wall
+    float m_accumulator = 0.0f;
     // -- //
 
 public:
@@ -38,6 +47,12 @@ public:
     ///     Called in the constructor to register all Commands.
     /// </summary>
     void registerCommands() override;
+
+    /// <summary>
+    ///     Creates the Box2D World, the ball Body and the static window edge Body.
+    /// </summary>
+    void createPhysicsWorld();
+
 
     /// <summary>
     ///     Updates scene logic.
