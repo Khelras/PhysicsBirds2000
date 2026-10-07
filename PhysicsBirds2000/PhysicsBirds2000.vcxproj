@@ -23,6 +23,8 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\managers\SceneManager.cpp" />
     <ClCompile Include="src\managers\StateManager.cpp" />
+    <ClCompile Include="src\physics\Bird.cpp" />
+    <ClCompile Include="src\physics\Slingshot.cpp" />
     <ClCompile Include="src\scenes\SceneMain.cpp" />
     <ClCompile Include="src\states\StateMain.cpp" />
   </ItemGroup>
@@ -32,6 +34,9 @@
     <ClInclude Include="include\myproject\core\Window.h" />
     <ClInclude Include="include\myproject\managers\SceneManager.h" />
     <ClInclude Include="include\myproject\managers\StateManager.h" />
+    <ClInclude Include="include\myproject\physics\Bird.h" />
+    <ClInclude Include="include\myproject\physics\PhysicsLibrary.h" />
+    <ClInclude Include="include\myproject\physics\Slingshot.h" />
     <ClInclude Include="include\myproject\scenes\Scene.h" />
     <ClInclude Include="include\myproject\scenes\SceneMain.h" />
     <ClInclude Include="include\myproject\states\State.h" />

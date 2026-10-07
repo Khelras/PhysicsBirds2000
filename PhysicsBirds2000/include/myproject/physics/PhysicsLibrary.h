@@ -15,7 +15,7 @@ Mail        : angelo.bohol@mds.ac.nz
 /// <summary>
 ///     Box2D works in meters whereas SFML works in Pixels. These helpers convert between the two.
 /// </summary>
-namespace PhysicsUtils
+namespace PhysicsLibrary
 {
     constexpr float PIXELS_PER_METRE = 30.0f;
 

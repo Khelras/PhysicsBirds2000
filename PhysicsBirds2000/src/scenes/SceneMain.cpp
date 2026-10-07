@@ -10,23 +10,31 @@ Author      : Angelo Joseph Arawiran Bohol
 Mail        : angelo.bohol@mds.ac.nz
 **************************************************************************/
 
+#include <cmath>
 #include <iostream>
-#include <SFML/Graphics.hpp>
-#include <box2d/box2d.h>
 #include "myproject/scenes/SceneMain.h"
 #include "myproject/core/Settings.h"
+#include "myproject/physics/PhysicsLibrary.h"
+#include "myproject/physics/Slingshot.h"
+#include "myproject/physics/Bird.h"
 
 namespace
 {
-	// Box2D works in Metres whereas SFML works in Pixels
-	constexpr float PIXELS_PER_METRE = 30.0f;
-	constexpr float CIRCLE_RADIUS_PX = 50.0f;
 	constexpr float FIXED_TIME_STEP = 1.0f / 60.0f;
 	constexpr int VELOCITY_ITERATIONS = 8;
 	constexpr int POSITION_ITERATIONS = 3;
 
-	float toMetres(float pixels) { return pixels / PIXELS_PER_METRE; }
-	float toPixels(float metres) { return metres * PIXELS_PER_METRE; }
+	constexpr float BIRD_RADIUS_PX = 20.0f;
+	constexpr int BIRDS_PER_LEVEL = 3;
+	constexpr float GRAB_RADIUS_FACTOR = 1.5f; // Forgiving click area around the Bird
+	constexpr float MIN_PULL_PX = 10.0f; // Pulls shorter than this cancel the shot
+	constexpr float MAX_PULL_PX = 120.0f;
+	constexpr float LAUNCH_POWER = 4.5f; // (m/s) of launch speed per Metre pulled back
+
+	float distanceBetween(const sf::Vector2f& a, const sf::Vector2f& b)
+	{
+		return std::hypot(a.x - b.x, a.y - b.y);
+	}
 }
 
 SceneMain::SceneMain()
@@ -34,8 +42,16 @@ SceneMain::SceneMain()
 	// Register the Commands
 	this->registerCommands();
 
-	// Create the Physics World
+	// Create the Physics World and the Window Edges
 	this->createPhysicsWorld();
+
+	// Create the Slingshot, then load the first Bird into it
+	float windowH = static_cast<float>(Settings::getInstance().windowHeight);
+	float windowW = static_cast<float>(Settings::getInstance().windowWidth);
+	sf::Vector2f anchor(windowW * 0.15f, windowH - 200.0f);
+	this->m_slingshot = std::make_unique<Slingshot>(anchor, MAX_PULL_PX, LAUNCH_POWER);
+
+	this->resetBirds();
 }
 
 SceneMain::~SceneMain()
@@ -61,22 +77,85 @@ void SceneMain::registerCommands()
 		[this](const CommandContext& ctx)
 		{
 			// DEBUG
-			std::cout << "Space Key Pressed in Context of the Main Scene!" << std::endl;
+			std::cout << "Space Key Pressed: Resetting the Birds!" << std::endl;
 
-			// Launch the Ball upwards (Negative Y is up)
-			this->m_ballBody->ApplyLinearImpulseToCenter(b2Vec2(0.0f, -30.0f), true);
+			// Reset all the Birds
+			this->resetBirds();
 		}
 	});
 	// -- //
 }
 
+void SceneMain::update(StateContext ctx)
+{
+	// Get the time since the last frame, clamped so a long hitch does not cause a huge physics jump
+	float deltaTime = this->m_clock.restart().asSeconds();
+	if (deltaTime > 0.25f)
+	{
+		deltaTime = 0.25f;
+	}
+
+	// Handle the Slingshot Input before stepping the Physics
+	this->handleSlingshotInput(ctx);
+
+	// Step the Physics World at a Fixed Time Step for stable, consistent simulation
+	this->m_accumulator += deltaTime;
+	while (this->m_accumulator >= FIXED_TIME_STEP)
+	{
+		this->m_world->Step(FIXED_TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
+		this->m_accumulator -= FIXED_TIME_STEP;
+	}
+
+	// Update every Bird (tracks which ones have come to rest)
+	for (auto& bird : this->m_birds)
+	{
+		bird->update(deltaTime);
+	}
+
+	// Once the current Bird is Spent, load the next one
+	if (this->m_currentBird != nullptr && this->m_currentBird->getState() == BirdState::Spent)
+	{
+		if (this->m_birdsRemaining > 0)
+		{
+			this->loadNextBird();
+		}
+		else
+		{
+			// DEBUG: The Lose Condition check will be added here later
+			std::cout << "Out of Birds!" << std::endl;
+			this->m_currentBird = nullptr;
+		}
+	}
+}
+
+void SceneMain::render(StateContext ctx)
+{
+	// -- Slingshot (Bands stretch to the Bird while it is held, otherwise rest at the anchor) -- //
+	sf::Vector2f bandEnd = this->m_slingshot->getAnchorPx();
+	if (this->m_currentBird != nullptr)
+	{
+		BirdState state = this->m_currentBird->getState();
+		if (state == BirdState::Waiting || state == BirdState::Dragging)
+		{
+			bandEnd = this->m_currentBird->getPositionPx();
+		}
+	}
+	this->m_slingshot->render(*ctx.window, bandEnd);
+	// -- //
+
+	// -- Birds -- //
+	for (const auto& bird : this->m_birds)
+	{
+		bird->render(*ctx.window);
+	}
+	// -- //
+}
+
 void SceneMain::createPhysicsWorld()
 {
-	// Width and Height of the Window in Pixels
 	float windowW = static_cast<float>(Settings::getInstance().windowWidth);
 	float windowH = static_cast<float>(Settings::getInstance().windowHeight);
 
-	// Gravity points down the Y Axis (SFML's Y Axis already points down the screen)
 	this->m_world = std::make_unique<b2World>(b2Vec2(0.0f, 9.8f));
 
 	// -- Window Edges (One Static Body with four Edge Fixtures) -- //
@@ -85,8 +164,8 @@ void SceneMain::createPhysicsWorld()
 	wallDef.position.Set(0.0f, 0.0f);
 	this->m_wallBody = this->m_world->CreateBody(&wallDef);
 
-	float w = toMetres(windowW);
-	float h = toMetres(windowH);
+	float w = PhysicsLibrary::toMetres(windowW);
+	float h = PhysicsLibrary::toMetres(windowH);
 
 	b2Vec2 topLeft(0.0f, 0.0f);
 	b2Vec2 topRight(w, 0.0f);
@@ -95,62 +174,84 @@ void SceneMain::createPhysicsWorld()
 
 	b2EdgeShape edge;
 
-	edge.SetTwoSided(topLeft, topRight);       // Top
+	edge.SetTwoSided(topLeft, topRight);
 	this->m_wallBody->CreateFixture(&edge, 0.0f);
-	edge.SetTwoSided(topRight, bottomRight);   // Right
+	edge.SetTwoSided(topRight, bottomRight);
 	this->m_wallBody->CreateFixture(&edge, 0.0f);
-	edge.SetTwoSided(bottomRight, bottomLeft); // Bottom
+	edge.SetTwoSided(bottomRight, bottomLeft);
 	this->m_wallBody->CreateFixture(&edge, 0.0f);
-	edge.SetTwoSided(bottomLeft, topLeft);     // Left
+	edge.SetTwoSided(bottomLeft, topLeft);
 	this->m_wallBody->CreateFixture(&edge, 0.0f);
-	// -- //
-
-	// -- Ball (Dynamic Body with a Circle Fixture) -- //
-	b2BodyDef ballDef;
-	ballDef.type = b2_dynamicBody;
-	ballDef.position.Set(toMetres(windowW / 2.0f), toMetres(windowH / 4.0f));
-	this->m_ballBody = this->m_world->CreateBody(&ballDef);
-
-	b2CircleShape circleShape;
-	circleShape.m_radius = toMetres(CIRCLE_RADIUS_PX);
-
-	b2FixtureDef ballFixture;
-	ballFixture.shape = &circleShape;
-	ballFixture.density = 1.0f;
-	ballFixture.friction = 0.3f;
-	ballFixture.restitution = 0.8f; // Bounciness (0 = no bounce, 1 = perfect bounce)
-	this->m_ballBody->CreateFixture(&ballFixture);
-
-	// Give the Ball a small sideways push so it does not just bounce straight up and down
-	this->m_ballBody->SetLinearVelocity(b2Vec2(6.0f, 0.0f));
 	// -- //
 }
 
-void SceneMain::update(StateContext ctx)
+void SceneMain::loadNextBird()
 {
-	// Clamp the given Delta Time so any lag spikes does NOT cause a huge physics jump
-	float deltaTime = ctx.dt;
-	if (deltaTime > 0.25f) deltaTime = 0.25f;
-
-	// Step the Physics World at a Fixed Time Step for a stable and consistent simulation
-	this->m_accumulator += deltaTime;
-	while (this->m_accumulator >= FIXED_TIME_STEP)
+	if (this->m_birdsRemaining <= 0)
 	{
-		this->m_world->Step(FIXED_TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
-		this->m_accumulator -= FIXED_TIME_STEP;
+		this->m_currentBird = nullptr;
+		return;
 	}
+
+	this->m_birds.push_back(
+		std::make_unique<Bird>(*this->m_world, this->m_slingshot->getAnchorPx(), BIRD_RADIUS_PX));
+	this->m_currentBird = this->m_birds.back().get();
+	--this->m_birdsRemaining;
 }
 
-void SceneMain::render(StateContext ctx)
+void SceneMain::resetBirds()
 {
-	// -- TEMPORARY: Draw a simple Green Circle Shape to the Window -- //
-	b2Vec2 ballPosition = this->m_ballBody->GetPosition();
-	sf::Vector2f centerPosition(toPixels(ballPosition.x), toPixels(ballPosition.y));
+	// Destroying the Birds also removes their Bodies from the World
+	this->m_currentBird = nullptr;
+	this->m_birds.clear();
+	this->m_birdsRemaining = BIRDS_PER_LEVEL;
+	this->loadNextBird();
+}
 
-	sf::CircleShape circle(CIRCLE_RADIUS_PX);
-	circle.setOrigin(circle.getGeometricCenter());
-	circle.setFillColor(sf::Color::Green);
-	circle.setPosition(centerPosition);
-	ctx.window->draw(circle);
+void SceneMain::handleSlingshotInput(StateContext ctx)
+{
+	// -- Read the Mouse (only counts when the Window has focus) -- //
+	bool mouseDown = ctx.window->hasFocus() && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+	sf::Vector2f mousePx = ctx.window->mapPixelToCoords(sf::Mouse::getPosition(*ctx.window));
 	// -- //
+
+	if (this->m_currentBird != nullptr)
+	{
+		BirdState state = this->m_currentBird->getState();
+
+		if (mouseDown && !this->m_wasMouseDown && state == BirdState::Waiting)
+		{
+			// -- Mouse just pressed: grab the Bird if the click was close enough -- //
+			float grabRadius = this->m_currentBird->getRadiusPx() * GRAB_RADIUS_FACTOR;
+			if (distanceBetween(mousePx, this->m_currentBird->getPositionPx()) <= grabRadius)
+			{
+				this->m_currentBird->beginDrag();
+			}
+			// -- //
+		}
+		else if (mouseDown && state == BirdState::Dragging)
+		{
+			// -- Mouse held: pull the Bird back, limited by the maximum pull distance -- //
+			this->m_currentBird->setHeldPosition(this->m_slingshot->clampPull(mousePx));
+			// -- //
+		}
+		else if (!mouseDown && state == BirdState::Dragging)
+		{
+			// -- Mouse released: launch the Bird, or cancel if barely pulled back -- //
+			sf::Vector2f birdPos = this->m_currentBird->getPositionPx();
+
+			if (distanceBetween(birdPos, this->m_slingshot->getAnchorPx()) < MIN_PULL_PX)
+			{
+				this->m_currentBird->setHeldPosition(this->m_slingshot->getAnchorPx());
+				this->m_currentBird->cancelDrag();
+			}
+			else
+			{
+				this->m_currentBird->launch(this->m_slingshot->getLaunchVelocity(birdPos));
+			}
+			// -- //
+		}
+	}
+
+	this->m_wasMouseDown = mouseDown;
 }
