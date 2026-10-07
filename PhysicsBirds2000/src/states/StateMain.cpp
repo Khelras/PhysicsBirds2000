@@ -38,28 +38,9 @@ StateMain::~StateMain()
 
 void StateMain::registerCommands()
 {
-	// -- Space Key Pressed -- //
-	this->m_commands.push_back({
-		// Execution Criteria
-		[](const sf::Event& event)
-		{
-			// First check if the Event was a Key Press, then check if the Key was the Space Key
-			if (const auto* key = event.getIf<sf::Event::KeyPressed>())
-			{
-				return key->code == sf::Keyboard::Key::Space;
-			}
-
-			// Otherwise, the event does not match the criteria
-			return false;
-		},
-		// Command Action
-		[this](const CommandContext& ctx)
-		{
-			// DEBUG
-			std::cout << "Space Key Pressed in Context of the Main State!" << std::endl;
-		}
-	});
-	// -- //
+	// DISCLAIMER
+	// REGISTERING COMMANDS IN THE CONTEXT OF A STATE WILL MAKE IT STATE GLOBAL
+	// MEANING IT WILL BE AVAILABLE TO ALL SCENES UNDER THIS STATE
 }
 
 void StateMain::handleEvent(const sf::Event& event, CommandContext& ctx)

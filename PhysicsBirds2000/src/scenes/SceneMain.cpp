@@ -12,6 +12,7 @@ Mail        : angelo.bohol@mds.ac.nz
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <box2d/box2d.h>
 #include "myproject/scenes/SceneMain.h"
 #include "myproject/core/Settings.h"
 
