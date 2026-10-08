@@ -80,5 +80,8 @@
     <ClInclude Include="include\myproject\scenes\levels\LevelTwo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\myproject\physics\PhysicsLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

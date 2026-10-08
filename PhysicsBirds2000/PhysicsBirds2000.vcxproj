@@ -35,6 +35,7 @@
     <ClInclude Include="include\myproject\core\Window.h" />
     <ClInclude Include="include\myproject\managers\SceneManager.h" />
     <ClInclude Include="include\myproject\managers\StateManager.h" />
+    <ClInclude Include="include\myproject\physics\PhysicsLibrary.h" />
     <ClInclude Include="include\myproject\physics\PhysicsObject.h" />
     <ClInclude Include="include\myproject\scenes\levels\LevelOne.h" />
     <ClInclude Include="include\myproject\scenes\levels\LevelTwo.h" />
