@@ -41,6 +41,58 @@ void StateMain::registerCommands()
 	// DISCLAIMER
 	// REGISTERING COMMANDS IN THE CONTEXT OF A STATE WILL MAKE IT STATE GLOBAL
 	// MEANING IT WILL BE AVAILABLE TO ALL SCENES UNDER THIS STATE
+
+	// -- F1 Key Pressed -- //
+	this->m_commands.push_back({
+		// Execution Criteria
+		[](const sf::Event& event)
+		{
+			// First check if the Event was a Key Press, then check if the Key was the F1 Key
+			if (const auto* key = event.getIf<sf::Event::KeyPressed>())
+			{
+				return key->code == sf::Keyboard::Key::F1;
+			}
+
+			// Otherwise, the event does not match the criteria
+			return false;
+		},
+		// Command Action
+		[this](const CommandContext& ctx)
+		{
+			// DEBUG
+			std::cout << "F1 Key pressed, going to Level One Scene." << std::endl;
+
+			// Go to Level One Scene
+			this->m_sceneManager->goToScene("LevelOne");
+		}
+	});
+	// -- //
+
+	// -- F2 Key Pressed -- //
+	this->m_commands.push_back({
+		// Execution Criteria
+		[](const sf::Event& event)
+		{
+			// First check if the Event was a Key Press, then check if the Key was the F2 Key
+			if (const auto* key = event.getIf<sf::Event::KeyPressed>())
+			{
+				return key->code == sf::Keyboard::Key::F2;
+			}
+
+			// Otherwise, the event does not match the criteria
+			return false;
+		},
+		// Command Action
+		[this](const CommandContext& ctx)
+		{
+			// DEBUG
+			std::cout << "F2 Key pressed, going to Level Two Scene." << std::endl;
+
+			// Go to Level Two Scene
+			this->m_sceneManager->goToScene("LevelTwo");
+		}
+	});
+	// -- //
 }
 
 void StateMain::handleEvent(const sf::Event& event, CommandContext& ctx)

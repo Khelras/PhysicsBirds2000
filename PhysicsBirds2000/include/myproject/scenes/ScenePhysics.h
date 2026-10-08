@@ -4,35 +4,39 @@ Media Design School
 Auckland
 New Zealand
 (c) 2026 Media Design School
-File Name   : SceneMain.h
-Description : Declares the SceneMain Class Functions and Properties.
+File Name   : ScenePhysics.h
+Description : Declares the ScenePhysics Class Functions and Properties.
 Author      : Angelo Joseph Arawiran Bohol
 Mail        : angelo.bohol@mds.ac.nz
 **************************************************************************/
 
 #pragma once
+#include <memory>
 #include "Scene.h"
 
+// Forward Declarations
+class b2World;
+
 /// <summary>
-///     The main scene which derives from the base scene class.
+///     The base physics scene which derives from the base scene class.
 /// </summary>
-class SceneMain : public Scene
+class ScenePhysics : public Scene
 {
 protected:
     // -- Main Scene Properties -- //
-    
+	std::unique_ptr<b2World> m_physicsWorld;
     // -- //
 
 public:
     /// <summary>
     ///     Constructor.
     /// </summary>
-    SceneMain();
+    ScenePhysics();
 
     /// <summary>
     ///     Destructor
     /// </summary>
-    ~SceneMain();
+    ~ScenePhysics();
 
     /// <summary>
     ///     Called in the constructor to register all Commands.
@@ -43,13 +47,20 @@ public:
     ///     Updates scene logic.
     /// </summary>
     /// 
-    /// <param name="ctx">Context information that be used by the SceneMain.</param>
+    /// <param name="ctx">Context information that be used by the ScenePhysics.</param>
     void update(StateContext ctx) override;
 
     /// <summary>
     ///     Renders scene contents to the Window.
     /// </summary>
     /// 
-    /// <param name="ctx">Context information that be used by the SceneMain.</param>
+    /// <param name="ctx">Context information that be used by the ScenePhysics.</param>
     void render(StateContext ctx) override;
+
+// PROTECTED HELPER FUNCTIONS
+protected:
+	/// <summary>
+	///     Create the Box2D Physics World.
+	/// </summary>
+	virtual void createPhysicsWorld();
 };

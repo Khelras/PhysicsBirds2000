@@ -30,10 +30,16 @@
     <ClCompile Include="src\core\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\SceneMain.cpp">
     <ClCompile Include="src\physics\PhysicsObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\levels\LevelOne.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\levels\LevelTwo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\ScenePhysics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,10 +68,16 @@
     <ClInclude Include="include\myproject\core\Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\myproject\scenes\SceneMain.h">
+    <ClInclude Include="include\myproject\scenes\ScenePhysics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\myproject\physics\PhysicsObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\myproject\scenes\levels\LevelOne.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myproject\scenes\levels\LevelTwo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

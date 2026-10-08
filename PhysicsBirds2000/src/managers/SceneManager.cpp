@@ -13,15 +13,17 @@ Mail        : angelo.bohol@mds.ac.nz
 #include <iostream>
 
 #include "myproject/managers/SceneManager.h"
-#include "myproject/scenes/SceneMain.h"
+#include "myproject/scenes/levels/LevelOne.h"
+#include "myproject/scenes/levels/LevelTwo.h"
 
 SceneManager::SceneManager()
 {
 	// Register Scenes
-	this->m_sceneRegistry.emplace("MainScene", std::make_shared<SceneMain>());
+	this->m_sceneRegistry.emplace("LevelOne", std::make_shared<LevelOne>());
+	this->m_sceneRegistry.emplace("LevelTwo", std::make_shared<LevelTwo>());
 
 	// Start with the First Scene
-	this->m_currentScene = this->m_sceneRegistry.at("MainScene");
+	this->m_currentScene = this->m_sceneRegistry.at("LevelOne");
 }
 
 void SceneManager::handleEvent(const sf::Event& event, CommandContext& ctx)

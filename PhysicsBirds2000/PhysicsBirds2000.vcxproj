@@ -23,8 +23,10 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\managers\SceneManager.cpp" />
     <ClCompile Include="src\managers\StateManager.cpp" />
-    <ClCompile Include="src\scenes\SceneMain.cpp" />
     <ClCompile Include="src\physics\PhysicsObject.cpp" />
+    <ClCompile Include="src\scenes\levels\LevelOne.cpp" />
+    <ClCompile Include="src\scenes\levels\LevelTwo.cpp" />
+    <ClCompile Include="src\scenes\ScenePhysics.cpp" />
     <ClCompile Include="src\states\StateMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -34,8 +36,10 @@
     <ClInclude Include="include\myproject\managers\SceneManager.h" />
     <ClInclude Include="include\myproject\managers\StateManager.h" />
     <ClInclude Include="include\myproject\physics\PhysicsObject.h" />
+    <ClInclude Include="include\myproject\scenes\levels\LevelOne.h" />
+    <ClInclude Include="include\myproject\scenes\levels\LevelTwo.h" />
     <ClInclude Include="include\myproject\scenes\Scene.h" />
-    <ClInclude Include="include\myproject\scenes\SceneMain.h" />
+    <ClInclude Include="include\myproject\scenes\ScenePhysics.h" />
     <ClInclude Include="include\myproject\states\State.h" />
     <ClInclude Include="include\myproject\states\StateMain.h" />
   </ItemGroup>
