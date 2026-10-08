@@ -31,9 +31,20 @@ namespace
     }
 }
 
-Slingshot::Slingshot(const sf::Vector2f& anchorPx, float maxPullPx, float launchPower)
-    : m_anchorPx(anchorPx), m_maxPullPx(maxPullPx), m_launchPower(launchPower), m_postHeightPx(120.0f)
-{}
+Slingshot::Slingshot(b2World& world, const sf::Vector2f& anchorPx, float maxPullPx, float springFrequencyHz, float dampingRatio)
+{
+    this->m_anchorPx = anchorPx;
+    this->m_maxPullPx = maxPullPx;
+	this->m_springFrequencyHz = springFrequencyHz;
+	this->m_dampingRatio = dampingRatio;
+    this->m_postHeightPx = 120.0f;
+
+    // Static Body at the anchor point for the Spring Joint to attach to
+    b2BodyDef anchorDef;
+    anchorDef.type = b2_staticBody;
+    anchorDef.position.Set(PhysicsLibrary::toMetres(anchorPx.x), PhysicsLibrary::toMetres(anchorPx.y));
+    this->m_anchorBody = world.CreateBody(&anchorDef);
+}
 
 Slingshot::~Slingshot()
 {
@@ -53,12 +64,9 @@ sf::Vector2f Slingshot::clampPull(const sf::Vector2f& mousePx) const
     return this->m_anchorPx + offset;
 }
 
-b2Vec2 Slingshot::getLaunchVelocity(const sf::Vector2f& birdPx) const
+void Slingshot::fire(Bird& bird) const
 {
-    sf::Vector2f pull = this->m_anchorPx - birdPx;
-
-    return b2Vec2(PhysicsLibrary::toMetres(pull.x) * this->m_launchPower,
-        PhysicsLibrary::toMetres(pull.y) * this->m_launchPower);
+    bird.launchWithSpring(*this->m_anchorBody, this->m_springFrequencyHz, this->m_dampingRatio);
 }
 
 void Slingshot::render(sf::RenderWindow& window, const sf::Vector2f& bandEndPx) const

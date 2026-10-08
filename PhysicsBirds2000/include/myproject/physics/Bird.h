@@ -21,6 +21,7 @@ enum class BirdState
 {
     Waiting,  // Sitting in the Slingshot
     Dragging, // Being pulled back by the Player
+    Launching, // Released, the Slingshot Spring is accelerating the Bird
     Flying,   // Launched and under physics control
     Spent     // Came to rest, ready to be replaced by the next Bird
 };
@@ -35,6 +36,10 @@ protected:
     b2World* m_world; // Non-owning, used to destroy the Body
     b2Body* m_body; // Owned by the World
     BirdState m_state;
+
+    b2Joint* m_springJoint; // Owned by the World, destroyed with the Body or manually
+    b2Vec2 m_anchorM; // Slingshot anchor in Metres
+    b2Vec2 m_launchDir; // Unit vector from the pulled position towards the anchor
 
     float m_radiusPx;
     sf::Color m_color;
@@ -78,16 +83,23 @@ public:
     void cancelDrag();
 
     /// <summary>
-    ///     Launches the Bird by applying an Impulse of mass * velocity.
+    ///     Launches the Bird by connecting it to the Slingshot anchor with a Spring (Distance Joint).
     /// </summary>
     /// 
-    /// <param name="velocity">The desired launch velocity in Metres per second.</param>
-    void launch(const b2Vec2& velocity);
+    /// <param name="anchorBody">The static Body at the Slingshot anchor.</param>
+    /// <param name="frequencyHz">The Spring frequency in Hertz.</param>
+    /// <param name="dampingRatio">The Spring damping ratio (0 = none, 1 = critical).</param>
+    void launchWithSpring(b2Body& anchorBody, float frequencyHz, float dampingRatio);
 
     /// <summary>
     ///     Tracks whether the Bird has come to rest. Derived Birds can extend this.
     /// </summary>
     virtual void update(float deltaTime);
+
+    /// <summary>
+    ///     Called once per physics step. Releases the Spring when the Bird passes the anchor.
+    /// </summary>
+    virtual void fixedUpdate();
 
     /// <summary>
     ///     Draws the Bird to the Window.
@@ -108,4 +120,11 @@ public:
 	///     Get the current state of the Bird.
     /// </returns>
     BirdState getState() const { return this->m_state; }
+
+// PROTECTED HELPER FUNCTIONS
+protected:
+    /// <summary>
+    ///     Destroys the Spring Joint so the Bird flies freely.
+    /// </summary>
+    void releaseSpring();
 };

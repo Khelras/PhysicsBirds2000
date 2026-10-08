@@ -29,7 +29,8 @@ namespace
 	constexpr float GRAB_RADIUS_FACTOR = 1.5f; // Forgiving click area around the Bird
 	constexpr float MIN_PULL_PX = 10.0f; // Pulls shorter than this cancel the shot
 	constexpr float MAX_PULL_PX = 120.0f;
-	constexpr float LAUNCH_POWER = 4.5f; // (m/s) of launch speed per Metre pulled back
+	constexpr float SPRING_FREQUENCY_HZ = 0.75f; // Higher = stiffer Spring = faster launch
+	constexpr float SPRING_DAMPING_RATIO = 0.05f;
 
 	float distanceBetween(const sf::Vector2f& a, const sf::Vector2f& b)
 	{
@@ -45,12 +46,11 @@ SceneMain::SceneMain()
 	// Create the Physics World and the Window Edges
 	this->createPhysicsWorld();
 
-	// Create the Slingshot, then load the first Bird into it
+	// Create the Slingshot and load the first Bird into it
 	float windowH = static_cast<float>(Settings::getInstance().windowHeight);
 	float windowW = static_cast<float>(Settings::getInstance().windowWidth);
 	sf::Vector2f anchor(windowW * 0.15f, windowH - 200.0f);
-	this->m_slingshot = std::make_unique<Slingshot>(anchor, MAX_PULL_PX, LAUNCH_POWER);
-
+	this->m_slingshot = std::make_unique<Slingshot>(*this->m_world, anchor, MAX_PULL_PX, SPRING_FREQUENCY_HZ, SPRING_DAMPING_RATIO);
 	this->resetBirds();
 }
 
@@ -103,6 +103,13 @@ void SceneMain::update(StateContext ctx)
 	while (this->m_accumulator >= FIXED_TIME_STEP)
 	{
 		this->m_world->Step(FIXED_TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
+
+		// The Spring release check runs between Steps, so it is safe to destroy the Joint
+		for (auto& bird : this->m_birds)
+		{
+			bird->fixedUpdate();
+		}
+
 		this->m_accumulator -= FIXED_TIME_STEP;
 	}
 
@@ -135,7 +142,7 @@ void SceneMain::render(StateContext ctx)
 	if (this->m_currentBird != nullptr)
 	{
 		BirdState state = this->m_currentBird->getState();
-		if (state == BirdState::Waiting || state == BirdState::Dragging)
+		if (state == BirdState::Waiting || state == BirdState::Dragging || state == BirdState::Launching)
 		{
 			bandEnd = this->m_currentBird->getPositionPx();
 		}
@@ -247,7 +254,8 @@ void SceneMain::handleSlingshotInput(StateContext ctx)
 			}
 			else
 			{
-				this->m_currentBird->launch(this->m_slingshot->getLaunchVelocity(birdPos));
+				// Release the Bird and the Spring accelerates it towards the anchor
+				this->m_slingshot->fire(*this->m_currentBird);
 			}
 			// -- //
 		}

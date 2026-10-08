@@ -13,6 +13,7 @@ Mail        : angelo.bohol@mds.ac.nz
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <box2d/box2d.h>
+#include "myproject/physics/Bird.h"
 
 /// <summary>
 ///     The Slingshot. Holds the aiming rules and draws itself. It has no Physics Body of its own.
@@ -23,15 +24,18 @@ protected:
     // -- Slingshot Properties -- //
     sf::Vector2f m_anchorPx; // Where the Bird rests
     float m_maxPullPx; // Maximum pull-back distance
-    float m_launchPower; // Launch velocity (m/s) per Metre pulled back
+    float m_springFrequencyHz; // Spring stiffness expressed as a frequency
+    float m_dampingRatio;
     float m_postHeightPx;
+    b2Body* m_anchorBody; // Static Body at the anchor, owned by the World (never delete it)
+
     // -- //
 
 public:
     /// <summary>
     ///     Constructor.
     /// </summary>
-    Slingshot(const sf::Vector2f& anchorPx, float maxPullPx, float launchPower);
+    Slingshot(b2World& world, const sf::Vector2f& anchorPx, float maxPullPx, float springFrequencyHz, float dampingRatio);
 
     /// <summary>
     ///     Destructor.
@@ -44,10 +48,9 @@ public:
     sf::Vector2f clampPull(const sf::Vector2f& mousePx) const;
 
     /// <summary>
-    ///     Calculates the launch velocity (Metres per second) for a Bird at the given position.
-    ///     The velocity points from the Bird back towards the anchor.
+    ///     Fires the Bird by attaching it to the anchor with a Spring.
     /// </summary>
-    b2Vec2 getLaunchVelocity(const sf::Vector2f& birdPx) const;
+    void fire(Bird& bird) const;
 
     /// <summary>
     ///     Draws the Slingshot post and the Rubber Bands.

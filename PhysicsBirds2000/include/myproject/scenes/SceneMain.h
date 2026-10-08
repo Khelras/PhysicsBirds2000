@@ -71,7 +71,7 @@ public:
     /// <param name="ctx">Context information that be used by the SceneMain.</param>
     void render(StateContext ctx) override;
 
-// Private Helper Functions
+// PRIVATE HELPER FUNCTIONS
 private:
     /// <summary>
     ///     Creates the Box2D World and the static window edge Body.
