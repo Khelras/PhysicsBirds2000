@@ -11,11 +11,13 @@
  ***********************************************************************/
 
 #include <iostream>
-#include "myproject/core/window.h"
+#include "myproject/core/Window.h"
+#include "myproject/core/Settings.h"
 
 int main()
 {
-    Window window;
+    Settings& settings = Settings::getInstance();
+    Window window(sf::VideoMode({ settings.windowWidth, settings.windowHeight }), "PhysicsBird2000");
     window.process();
     return 0;
 }
