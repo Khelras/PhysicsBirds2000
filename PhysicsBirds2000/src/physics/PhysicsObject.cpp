@@ -11,9 +11,10 @@ Mail        : angelo.bohol@mds.ac.nz
 **************************************************************************/
 
 #include "myproject/physics/PhysicsObject.h"
+#include "myproject/physics/PhysicsLibrary.h"
 
 PhysicsObject::PhysicsObject(b2Shape::Type shapeType, sf::Sprite* sprite, b2Vec2 size,
-	b2Vec2 position,sf::Angle rotation, b2BodyType bodyType, b2World* physicsWorld)
+	b2Vec2 position, sf::Angle rotation, b2BodyType bodyType, b2World* physicsWorld)
 {
 	this->m_sprite = sprite;
 	this->m_size = size;
@@ -66,4 +67,19 @@ b2Body* PhysicsObject::getBody() const
 }
 
 void PhysicsObject::draw(sf::RenderWindow& window) const
-{}
+{
+	// Scale of the Sprite
+	sf::Vector2f spriteScale(
+		this->m_size.x / (static_cast<float>(this->m_sprite->getTexture().getSize().x) / pl::sizeScale),
+		this->m_size.y / (static_cast<float>(this->m_sprite->getTexture().getSize().y) / pl::sizeScale)
+	);
+
+	// Set the Sprite's Scale, Origin, Position, and Rotation based on the Physics Object's properties
+	this->m_sprite->setScale(spriteScale);
+	this->m_sprite->setOrigin(this->m_sprite->getLocalBounds().getCenter());
+	this->m_sprite->setPosition({ this->m_body->GetPosition().x * pl::sizeScale, this->m_body->GetPosition().y * pl::sizeScale });
+	this->m_sprite->setRotation(sf::radians(this->m_body->GetAngle()));
+
+	// Draw the Sprite
+	window.draw(*this->m_sprite);
+}
