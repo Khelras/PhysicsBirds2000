@@ -15,6 +15,7 @@ Mail        : angelo.bohol@mds.ac.nz
 #include <box2d/box2d.h>
 #include "myproject/scenes/ScenePhysics.h"
 #include "myproject/core/Settings.h"
+#include "myproject/physics/PhysicsContactListener.h"
 
 ScenePhysics::ScenePhysics()
 {
@@ -38,7 +39,17 @@ void ScenePhysics::registerCommands()
 
 void ScenePhysics::update(StateContext ctx)
 {
+	// Physics World Step
 	this->m_physicsWorld->Step(1.0f / 60.0f, 8, 3);
+
+	// Remove Physics Objects that are marked for destruction
+	for (auto it = this->m_physicsObjects.begin(); it != this->m_physicsObjects.end();)
+	{
+		if ((*it)->isMarkedForDestroy())
+			it = this->m_physicsObjects.erase(it);
+		else
+			it++;
+	}
 }
 
 void ScenePhysics::render(StateContext ctx)
@@ -47,6 +58,17 @@ void ScenePhysics::render(StateContext ctx)
 	{
 		physicsObject->draw(*ctx.window);
 	}
+}
+
+std::vector<PhysicsObject*> ScenePhysics::getPhysicsObjects()
+{
+	std::vector<PhysicsObject*> physicsObjects;
+	for (auto& physicsObject : this->m_physicsObjects)
+	{
+		physicsObjects.push_back(physicsObject.get());
+	}
+
+	return physicsObjects;
 }
 
 void ScenePhysics::loadAssets()
@@ -70,8 +92,10 @@ void ScenePhysics::loadAssets()
 
 void ScenePhysics::createPhysicsWorld()
 {
-	// Default Physics World
+	// Physics World
 	this->m_physicsWorld = std::make_unique<b2World>(b2Vec2(0.0f, 9.81f));
+	this->m_contactListener = std::make_unique<PhysicsContactListener>(this->m_physicsWorld.get(), this);
+	this->m_physicsWorld->SetContactListener(this->m_contactListener.get());
 
 	// Ground Object
 	this->m_physicsObjects.emplace_back(

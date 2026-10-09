@@ -66,6 +66,26 @@ b2Body* PhysicsObject::getBody() const
 	return this->m_body;
 }
 
+void PhysicsObject::receiveImpact(float impactStrength)
+{
+	// Industructible Physics Objects do not receive impact
+	if (this->m_isIndustructible == true) return;
+
+	// No Dmaaging static bodies
+	if (this->m_body->GetType() == b2BodyType::b2_staticBody) return;
+
+	if (impactStrength > 1.0f)
+	{
+		this->m_health -= impactStrength;
+		
+		// Health is below or equal to 0, mark this Physics Object for destruction
+		if (this->m_health <= 0.0f)
+		{
+			this->m_isMakredForDestroy = true;
+		}
+	}
+}
+
 void PhysicsObject::draw(sf::RenderWindow& window) const
 {
 	// Scale of the Sprite

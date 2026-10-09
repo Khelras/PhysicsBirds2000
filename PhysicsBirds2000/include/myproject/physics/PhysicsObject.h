@@ -25,6 +25,10 @@ private:
 	b2Body* m_body = nullptr;
 	b2World* m_physicsWorld = nullptr;
     b2Vec2 m_size;
+
+	bool m_isIndustructible = false;
+    bool m_isMakredForDestroy = false;
+	float m_health = 10.0f; // Default Health to 10
     // -- //
 
 public:
@@ -52,10 +56,30 @@ public:
     /// </returns>
 	b2Body* getBody() const;
     
+    /// <summary>
+    ///     Physics Object receiving impact.
+    /// </summary>
+    /// 
+    /// <param name="impactStrength">Strength of the impact.</param>
+    void receiveImpact(float impactStrength);
+
 	/// <summary>
 	///     Draw the sprite of this physics object to the given window.
 	/// </summary>
     /// 
 	/// <param name="window">Reference to the render window target.</param>
 	void draw(sf::RenderWindow& window) const;
+
+    /// <param name="newHealth">New Health of this physics object .</param>
+    /// <param name="isIndustructable">Is this physics object  industructable or not. Defaulted to false.</param>
+    inline void setHealth(float newHealth, bool isIndustructable = false)
+    {
+		this->m_health = newHealth;
+        this->m_isIndustructible = isIndustructable;
+    };
+
+    /// <summary>
+	///     Check if this physics object is marked for destroy.
+    /// </summary>
+    inline bool isMarkedForDestroy() const { return this->m_isMakredForDestroy; };
 };

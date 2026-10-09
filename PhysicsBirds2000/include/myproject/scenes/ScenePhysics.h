@@ -18,6 +18,7 @@ Mail        : angelo.bohol@mds.ac.nz
 
 // Forward Declarations
 class b2World;
+class PhysicsContactListener;
 
 /// <summary>
 ///     The base physics scene which derives from the base scene class.
@@ -40,6 +41,7 @@ protected:
 
     // Physics
     std::unique_ptr<b2World> m_physicsWorld;
+    std::unique_ptr<PhysicsContactListener> m_contactListener;
 	std::vector<std::unique_ptr<PhysicsObject>> m_physicsObjects;
     // -- //
 
@@ -72,6 +74,11 @@ public:
     /// 
     /// <param name="ctx">Context information that be used by the ScenePhysics.</param>
     void render(StateContext ctx) override;
+
+    /// <returns>
+	///     Vector of Physics Objects in the Scene.
+    /// </returns>
+    std::vector<PhysicsObject*> getPhysicsObjects();
 
 // PROTECTED HELPER FUNCTIONS
 protected:
