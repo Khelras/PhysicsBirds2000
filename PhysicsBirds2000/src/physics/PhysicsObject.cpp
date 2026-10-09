@@ -13,7 +13,7 @@ Mail        : angelo.bohol@mds.ac.nz
 #include "myproject/physics/PhysicsObject.h"
 #include "myproject/physics/PhysicsLibrary.h"
 
-PhysicsObject::PhysicsObject(b2Shape::Type shapeType, sf::Sprite* sprite, b2Vec2 size,
+PhysicsObject::PhysicsObject(b2Shape::Type shapeType, std::shared_ptr<sf::Sprite> sprite, b2Vec2 size,
 	b2Vec2 position, sf::Angle rotation, b2BodyType bodyType, b2World* physicsWorld)
 {
 	this->m_sprite = sprite;
@@ -33,7 +33,7 @@ PhysicsObject::PhysicsObject(b2Shape::Type shapeType, sf::Sprite* sprite, b2Vec2
 
 	// Set the Shape of the Fixture based on the provided Shape Type
 	b2PolygonShape polygonShape;
-	b2PolygonShape circleShape;
+	b2CircleShape circleShape;
 	switch (shapeType)
 	{
 		case (b2Shape::Type::e_polygon):

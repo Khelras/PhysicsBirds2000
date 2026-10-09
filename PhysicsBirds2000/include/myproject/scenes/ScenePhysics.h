@@ -12,7 +12,9 @@ Mail        : angelo.bohol@mds.ac.nz
 
 #pragma once
 #include <memory>
-#include "Scene.h"
+#include <vector>
+#include "myproject/scenes/Scene.h"
+#include "myproject/physics/PhysicsObject.h"
 
 // Forward Declarations
 class b2World;
@@ -23,8 +25,22 @@ class b2World;
 class ScenePhysics : public Scene
 {
 protected:
-    // -- Main Scene Properties -- //
-	std::unique_ptr<b2World> m_physicsWorld;
+    // -- Physics Scene Properties -- //
+    // Textures
+    sf::Texture m_groundTexture;
+    sf::Texture m_redBirdTexture;
+    sf::Texture m_yellowBirdTexture;
+    sf::Texture m_greenBirdTexture;
+
+    // Sprites
+    std::shared_ptr<sf::Sprite> m_groundSprite;
+    std::shared_ptr<sf::Sprite> m_redBirdSprite;
+    std::shared_ptr<sf::Sprite> m_yellowBirdSprite;
+    std::shared_ptr<sf::Sprite> m_greenBirdSprite;
+
+    // Physics
+    std::unique_ptr<b2World> m_physicsWorld;
+	std::vector<std::unique_ptr<PhysicsObject>> m_physicsObjects;
     // -- //
 
 public:
@@ -59,6 +75,11 @@ public:
 
 // PROTECTED HELPER FUNCTIONS
 protected:
+    /// <summary>
+    ///     Load the assets, including textures and sprites.
+    /// </summary>
+    virtual void loadAssets();
+
 	/// <summary>
 	///     Create the Box2D Physics World.
 	/// </summary>

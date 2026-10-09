@@ -21,7 +21,7 @@ class PhysicsObject
 {
 private:
     // -- Physics Object Properties -- //
-	sf::Sprite* m_sprite = nullptr;
+    std::shared_ptr<sf::Sprite> m_sprite;
 	b2Body* m_body = nullptr;
 	b2World* m_physicsWorld = nullptr;
     b2Vec2 m_size;
@@ -39,7 +39,7 @@ public:
     /// <param name="rotation">Rotation of this physics object.</param>
     /// <param name="bodyType">Body type of this physics object (rigid, kinematic, or dynamic).</param>
     /// <param name="physicsWorld">Pointer to the physics world.</param>
-    PhysicsObject(b2Shape::Type shapeType, sf::Sprite* sprite, b2Vec2 size,
+    PhysicsObject(b2Shape::Type shapeType, std::shared_ptr<sf::Sprite> sprite, b2Vec2 size,
         b2Vec2 position, sf::Angle rotation, b2BodyType bodyType, b2World* physicsWorld);
 
     /// <summary>

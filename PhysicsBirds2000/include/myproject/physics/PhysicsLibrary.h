@@ -18,7 +18,7 @@ namespace pl
 	/// <summary>
 	///		The size in pixels of a Box2D metre unit.
 	/// </summary>
-	const inline float sizeScale = 100.0f;
+	const inline float sizeScale = 50.0f;
 
 	/// <summary>
 	///		Gravity vector for the Box2D physics world.
