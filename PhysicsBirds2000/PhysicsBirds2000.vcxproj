@@ -23,6 +23,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\managers\SceneManager.cpp" />
     <ClCompile Include="src\managers\StateManager.cpp" />
+    <ClCompile Include="src\physics\BirdProjectile.cpp" />
     <ClCompile Include="src\physics\PhysicsContactListener.cpp" />
     <ClCompile Include="src\physics\PhysicsObject.cpp" />
     <ClCompile Include="src\scenes\levels\LevelOne.cpp" />
@@ -36,6 +37,7 @@
     <ClInclude Include="include\myproject\core\Window.h" />
     <ClInclude Include="include\myproject\managers\SceneManager.h" />
     <ClInclude Include="include\myproject\managers\StateManager.h" />
+    <ClInclude Include="include\myproject\physics\BirdProjectile.h" />
     <ClInclude Include="include\myproject\physics\PhysicsContactListener.h" />
     <ClInclude Include="include\myproject\physics\PhysicsLibrary.h" />
     <ClInclude Include="include\myproject\physics\PhysicsObject.h" />
