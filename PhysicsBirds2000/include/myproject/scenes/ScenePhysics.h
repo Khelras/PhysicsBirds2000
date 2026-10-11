@@ -32,12 +32,13 @@ protected:
     sf::Texture m_redBirdTexture;
     sf::Texture m_yellowBirdTexture;
     sf::Texture m_greenBirdTexture;
+    sf::Texture m_plankTexture;
 
     // Sprites
     std::shared_ptr<sf::Sprite> m_groundSprite;
     std::shared_ptr<sf::Sprite> m_redBirdSprite;
     std::shared_ptr<sf::Sprite> m_yellowBirdSprite;
-    std::shared_ptr<sf::Sprite> m_greenBirdSprite;
+    std::shared_ptr<sf::Sprite> m_plankSprite;
 
     // Physics
     std::unique_ptr<b2World> m_physicsWorld;
@@ -60,6 +61,11 @@ public:
     ///     Called in the constructor to register all Commands.
     /// </summary>
     void registerCommands() override;
+
+    /// <summary>
+    ///     Create the Box2D Physics World.
+    /// </summary>
+    virtual void createPhysicsWorld();
 
     /// <summary>
     ///     Updates scene logic.
@@ -87,8 +93,12 @@ protected:
     /// </summary>
     virtual void loadAssets();
 
-	/// <summary>
-	///     Create the Box2D Physics World.
-	/// </summary>
-	virtual void createPhysicsWorld();
+    /// <summary>
+	///     Create a plank physics object at the given position and rotation.
+    /// </summary>
+    /// 
+    /// <param name="position">2D position vector to spawn the plank.</param>
+    /// <param name="rotation">The plank's rotation.</param>
+    /// <param name="health">Total health of the plank (default to 50).</param>
+    virtual void createPlank(b2Vec2 position, sf::Angle rotation, float health = 50.0f);
 };

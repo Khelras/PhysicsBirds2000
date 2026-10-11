@@ -17,3 +17,19 @@ LevelOne::LevelOne()
 
 LevelOne::~LevelOne()
 {}
+
+void LevelOne::createPhysicsWorld()
+{
+	// Call from the base class
+	ScenePhysics::createPhysicsWorld();
+
+	// Extend Functionality
+	// Create Planks
+	this->createPlank(b2Vec2(15.0f, 12.0f), sf::degrees(0.0f));
+	this->createPlank(b2Vec2(16.0f, 10.0f), sf::degrees(90.0f));
+	this->createPlank(b2Vec2(17.0f, 12.0f), sf::degrees(0.0f));
+
+	this->createPlank(b2Vec2(15.0f, 8.0f), sf::degrees(0.0f));
+	this->createPlank(b2Vec2(16.0f, 6.0f), sf::degrees(90.0f));
+	this->createPlank(b2Vec2(17.0f, 8.0f), sf::degrees(0.0f));
+}

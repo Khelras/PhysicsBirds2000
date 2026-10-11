@@ -22,6 +22,12 @@ SceneManager::SceneManager()
 	this->m_sceneRegistry.emplace("LevelOne", std::make_shared<LevelOne>());
 	this->m_sceneRegistry.emplace("LevelTwo", std::make_shared<LevelTwo>());
 
+	// Create the Physics World for each Scene
+	std::shared_ptr<ScenePhysics> levelOneScene = std::dynamic_pointer_cast<ScenePhysics>(this->m_sceneRegistry.at("LevelOne"));
+	levelOneScene->createPhysicsWorld();
+	std::shared_ptr<ScenePhysics> levelTwoScene = std::dynamic_pointer_cast<ScenePhysics>(this->m_sceneRegistry.at("LevelTwo"));
+	levelTwoScene->createPhysicsWorld();
+
 	// Start with the First Scene
 	this->m_currentScene = this->m_sceneRegistry.at("LevelOne");
 }

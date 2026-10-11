@@ -24,9 +24,6 @@ ScenePhysics::ScenePhysics()
 
 	// Load the Assets
 	this->loadAssets();
-
-	// Create the Physics World
-	this->createPhysicsWorld();
 }
 
 ScenePhysics::~ScenePhysics()
@@ -36,6 +33,41 @@ void ScenePhysics::registerCommands()
 {
 
 }
+
+void ScenePhysics::createPhysicsWorld()
+{
+	// Physics World
+	this->m_physicsWorld = std::make_unique<b2World>(b2Vec2(0.0f, 9.81f));
+	this->m_contactListener = std::make_unique<PhysicsContactListener>(this->m_physicsWorld.get(), this);
+	this->m_physicsWorld->SetContactListener(this->m_contactListener.get());
+
+	// Ground Object
+	this->m_physicsObjects.emplace_back(
+		std::make_unique<PhysicsObject>(
+			b2Shape::e_polygon,
+			this->m_groundSprite,
+			b2Vec2(30.0f, 2.0f),
+			b2Vec2(15.0f, 15.0f),
+			sf::degrees(0.0f),
+			b2BodyType::b2_staticBody,
+			this->m_physicsWorld.get()
+		)
+	);
+
+	// Red Bird Physics Object
+	this->m_physicsObjects.emplace_back(
+		std::make_unique<PhysicsObject>(
+			b2Shape::e_circle,
+			this->m_redBirdSprite,
+			b2Vec2(1.0f, 1.0f),
+			b2Vec2(5.0f, 10.0f),
+			sf::degrees(0.0f),
+			b2BodyType::b2_dynamicBody,
+			this->m_physicsWorld.get()
+		)
+	)->setHealth(500.0f);
+}
+
 
 void ScenePhysics::update(StateContext ctx)
 {
@@ -82,44 +114,28 @@ void ScenePhysics::loadAssets()
 		std::cerr << "Error loading texture from 'assets/textures/yellow_bird.png'" << std::endl;
 	if (this->m_greenBirdTexture.loadFromFile("assets/textures/green_bird.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/green_bird.png'" << std::endl;
+	if (this->m_plankTexture.loadFromFile("assets/textures/plank.png") == false)
+		std::cerr << "Error loading texture from 'assets/textures/plank.png'" << std::endl;
 
 	// Create the Sprites
 	this->m_groundSprite = std::make_shared<sf::Sprite>(this->m_groundTexture);
 	this->m_redBirdSprite = std::make_shared<sf::Sprite>(this->m_redBirdTexture);
 	this->m_yellowBirdSprite = std::make_shared<sf::Sprite>(this->m_yellowBirdTexture);
-	this->m_greenBirdSprite = std::make_shared<sf::Sprite>(this->m_greenBirdTexture);
+	this->m_plankSprite = std::make_shared<sf::Sprite>(this->m_plankTexture);
 }
 
-void ScenePhysics::createPhysicsWorld()
+void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health)
 {
-	// Physics World
-	this->m_physicsWorld = std::make_unique<b2World>(b2Vec2(0.0f, 9.81f));
-	this->m_contactListener = std::make_unique<PhysicsContactListener>(this->m_physicsWorld.get(), this);
-	this->m_physicsWorld->SetContactListener(this->m_contactListener.get());
-
-	// Ground Object
+	// Create the Plank Physics Object
 	this->m_physicsObjects.emplace_back(
 		std::make_unique<PhysicsObject>(
 			b2Shape::e_polygon,
-			this->m_groundSprite,
-			b2Vec2(30.0f, 2.0f),
-			b2Vec2(15.0f, 15.0f),
-			sf::degrees(0.0f),
-			b2BodyType::b2_staticBody,
-			this->m_physicsWorld.get()
-		)
-	);
-
-	// Red Bird Physics Object
-	this->m_physicsObjects.emplace_back(
-		std::make_unique<PhysicsObject>(
-			b2Shape::e_circle,
-			this->m_redBirdSprite,
-			b2Vec2(1.0f, 1.0f),
-			b2Vec2(5.0f, 0.0f),
-			sf::degrees(0.0f),
+			this->m_plankSprite,
+			b2Vec2(0.5f, 3.0f),
+			position,
+			rotation,
 			b2BodyType::b2_dynamicBody,
 			this->m_physicsWorld.get()
 		)
-	);
+	)->setHealth(health);
 }

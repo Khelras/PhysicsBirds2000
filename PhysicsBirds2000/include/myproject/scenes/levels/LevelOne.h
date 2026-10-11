@@ -33,4 +33,9 @@ public:
 	///		Destructor.
 	/// </summary>
 	~LevelOne();
+
+	/// <summary>
+	///     Create the Box2D Physics World.
+	/// </summary>
+	void createPhysicsWorld() override;
 };
