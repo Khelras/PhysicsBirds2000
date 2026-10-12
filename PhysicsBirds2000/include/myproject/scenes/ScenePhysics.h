@@ -20,6 +20,7 @@ Mail        : angelo.bohol@mds.ac.nz
 class b2World;
 class PhysicsContactListener;
 class Slingshot;
+class BirdProjectile;
 
 /// <summary>
 ///     The base physics scene which derives from the base scene class.
@@ -50,6 +51,18 @@ protected:
     std::unique_ptr<Slingshot> m_slingshot;
 
     bool m_isLeftClicking = false;
+
+    BirdProjectile* m_activeBird = nullptr;
+    int m_maxBirds = 3;
+    int m_birdsRemaining = 0;
+
+    float m_birdFlightTime = 0.0f;
+    float m_birdStillTime = 0.0f;
+
+    float m_minFlightTime = 1.0f;
+    float m_maxFlightTime = 8.0f;
+    float m_requiredStillTime = 1.0f;
+    float m_stillSpeed = 0.3f;
     // -- //
 
 public:
@@ -119,12 +132,23 @@ protected:
     /// <param name="position">2D position vector to spawn the plank.</param>
     /// <param name="rotation">The plank's rotation.</param>
     /// <param name="health">Total health of the plank (default to 20).</param>
-    virtual void createPlank(b2Vec2 position, sf::Angle rotation, float health = 25.0f);
+    void createPlank(b2Vec2 position, sf::Angle rotation, float health = 25.0f);
 
     /// <summary>
     ///     Create the slingshot and load its initial projectile.
     /// </summary>
-    virtual void createSlingshot();
+    void createSlingshot();
+
+    /// <summary>
+    ///     Load the next bird projectile onto the slingshot.
+    /// </summary>
+    void loadNextBird();
+
+    /// <summary>
+    ///     Check whether the current bird projectile in flight has settled.
+    ///     If so, load the next bird projectile onto the slingshot.
+    /// </summary>
+    void updateBirdLoading(float timeStep);
 
     /// <summary>
     ///     Destroy the current physics world and rebuild this level.

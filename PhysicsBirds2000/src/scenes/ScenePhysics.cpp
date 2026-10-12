@@ -228,7 +228,11 @@ void ScenePhysics::update(StateContext ctx)
 	if (this->m_slingshot != nullptr)
 	{
 		this->m_slingshot->applyDragForce();
+		this->m_slingshot->update(timeStep);
 	}
+
+	// Check if the next bird should be loaded.
+	this->updateBirdLoading(timeStep);
 
 	// Physics World Step
 	this->m_physicsWorld->Step(timeStep, 8, 3);
@@ -282,6 +286,12 @@ std::vector<PhysicsObject*> ScenePhysics::getPhysicsObjects()
 
 void ScenePhysics::clearPhysicsWorld()
 {
+	// Reset Bird Loading State
+	this->m_activeBird = nullptr;
+	this->m_birdsRemaining = 0;
+	this->m_birdFlightTime = 0.0f;
+	this->m_birdStillTime = 0.0f;
+
 	// Reset Input State
 	this->m_isLeftClicking = false;
 
@@ -358,6 +368,29 @@ void ScenePhysics::createSlingshot()
 		this->m_physicsWorld.get()
 	);
 
+	// Start with a full set of bird projectiles and load the first one.
+	this->m_birdsRemaining = this->m_maxBirds;
+	this->loadNextBird();
+}
+
+void ScenePhysics::resetLevel()
+{
+	// Simply rebuild the level
+	this->createPhysicsWorld();
+}
+
+void ScenePhysics::loadNextBird()
+{
+	// Check if there are any birds left to load.
+	if (this->m_birdsRemaining <= 0)
+	{
+		// DEBUG
+		std::cout << "No birds remaining." << std::endl;
+
+		this->m_activeBird = nullptr;
+		return;
+	}
+
 	// Bird Projectile
 	auto bird = std::make_unique<BirdProjectile>(
 		this->m_redBirdSprite,
@@ -368,12 +401,57 @@ void ScenePhysics::createSlingshot()
 	// Attach the bird using the distance joint.
 	this->m_slingshot->loadBird(*bird);
 
-	// The scene owns the bird; the slingshot only borrows it.
+	// Track the new bird, the scene owns it and the slingshot only borrows it.
+	this->m_activeBird = bird.get();
 	this->m_physicsObjects.emplace_back(std::move(bird));
+
+	// Update the Bird Loading State
+	this->m_birdsRemaining--;
+	this->m_birdFlightTime = 0.0f;
+	this->m_birdStillTime = 0.0f;
+
+	// DEBUG
+	std::cout << "Bird loaded. Birds remaining after this one: " << this->m_birdsRemaining << std::endl;
 }
 
-void ScenePhysics::resetLevel()
+void ScenePhysics::updateBirdLoading(float timeStep)
 {
-	// Simply rebuild the level
-	this->createPhysicsWorld();
+	// Only track a bird that has actually been launched.
+	if (this->m_activeBird == nullptr || this->m_slingshot == nullptr) return;
+	if (this->m_activeBird->getState() != BirdProjectile::State::Flying) return;
+
+	this->m_birdFlightTime += timeStep;
+
+	b2Body* birdBody = this->m_activeBird->getBody();
+	const b2Vec2 birdPosition = birdBody->GetPosition();
+	const float birdSpeed = birdBody->GetLinearVelocity().Length();
+
+	// Track how long the bird has been nearly still.
+	if (birdSpeed < this->m_stillSpeed)
+	{
+		this->m_birdStillTime += timeStep;
+	}
+	else
+	{
+		this->m_birdStillTime = 0.0f;
+	}
+
+	// Settled: nearly still for long enough, or Box2D put the body to sleep.
+	const bool hasSettled = this->m_birdFlightTime >= this->m_minFlightTime &&
+		(this->m_birdStillTime >= this->m_requiredStillTime || birdBody->IsAwake() == false);
+
+	// Out of Bounds: the bird has left the play area.
+	const bool isOutOfBounds = birdPosition.x < -5.0f || birdPosition.x > 35.0f || birdPosition.y > 25.0f;
+
+	// Safety Timer: the bird has been in flight for too long.
+	const bool hasTimedOut = this->m_birdFlightTime >= this->m_maxFlightTime;
+
+	if (hasSettled == true || isOutOfBounds == true || hasTimedOut == true)
+	{
+		// The spent bird stays in the scene, so only stop tracking it.
+		this->m_activeBird = nullptr;
+
+		// Load the next bird.
+		this->loadNextBird();
+	}
 }
