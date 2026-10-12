@@ -19,7 +19,7 @@ Mail        : angelo.bohol@mds.ac.nz
 /// </summary>
 class PhysicsObject
 {
-private:
+protected:
     // -- Physics Object Properties -- //
     std::shared_ptr<sf::Sprite> m_sprite;
 	b2Body* m_body = nullptr;
@@ -49,7 +49,7 @@ public:
     /// <summary>
     ///     Destructor.
     /// </summary>
-    ~PhysicsObject();
+    virtual ~PhysicsObject();
 
 	/// <returns>
 	///	    Pointer to the Box2D Body of this physics object.
@@ -82,4 +82,12 @@ public:
 	///     Check if this physics object is marked for destroy.
     /// </summary>
     inline bool isMarkedForDestroy() const { return this->m_isMakredForDestroy; };
+
+// DELETED COPY CONSTRUCTORS
+public:
+    PhysicsObject(const PhysicsObject&) = delete;
+    PhysicsObject& operator=(const PhysicsObject&) = delete;
+
+    PhysicsObject(PhysicsObject&&) = delete;
+    PhysicsObject& operator=(PhysicsObject&&) = delete;
 };

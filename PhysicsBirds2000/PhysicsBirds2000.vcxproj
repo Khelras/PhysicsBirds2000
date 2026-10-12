@@ -23,8 +23,10 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\managers\SceneManager.cpp" />
     <ClCompile Include="src\managers\StateManager.cpp" />
+    <ClCompile Include="src\physics\BirdProjectile.cpp" />
     <ClCompile Include="src\physics\PhysicsContactListener.cpp" />
     <ClCompile Include="src\physics\PhysicsObject.cpp" />
+    <ClCompile Include="src\physics\Slingshot.cpp" />
     <ClCompile Include="src\scenes\levels\LevelOne.cpp" />
     <ClCompile Include="src\scenes\levels\LevelTwo.cpp" />
     <ClCompile Include="src\scenes\ScenePhysics.cpp" />
@@ -36,9 +38,11 @@
     <ClInclude Include="include\myproject\core\Window.h" />
     <ClInclude Include="include\myproject\managers\SceneManager.h" />
     <ClInclude Include="include\myproject\managers\StateManager.h" />
+    <ClInclude Include="include\myproject\physics\BirdProjectile.h" />
     <ClInclude Include="include\myproject\physics\PhysicsContactListener.h" />
     <ClInclude Include="include\myproject\physics\PhysicsLibrary.h" />
     <ClInclude Include="include\myproject\physics\PhysicsObject.h" />
+    <ClInclude Include="include\myproject\physics\Slingshot.h" />
     <ClInclude Include="include\myproject\scenes\levels\LevelOne.h" />
     <ClInclude Include="include\myproject\scenes\levels\LevelTwo.h" />
     <ClInclude Include="include\myproject\scenes\Scene.h" />

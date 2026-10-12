@@ -19,6 +19,7 @@ Mail        : angelo.bohol@mds.ac.nz
 // Forward Declarations
 class b2World;
 class PhysicsContactListener;
+class Slingshot;
 
 /// <summary>
 ///     The base physics scene which derives from the base scene class.
@@ -29,6 +30,7 @@ protected:
     // -- Physics Scene Properties -- //
     // Textures
     sf::Texture m_groundTexture;
+    sf::Texture m_slingshotTexture;
     sf::Texture m_redBirdTexture;
     sf::Texture m_yellowBirdTexture;
     sf::Texture m_greenBirdTexture;
@@ -36,6 +38,7 @@ protected:
 
     // Sprites
     std::shared_ptr<sf::Sprite> m_groundSprite;
+    std::shared_ptr<sf::Sprite> m_slingshotSprite;
     std::shared_ptr<sf::Sprite> m_redBirdSprite;
     std::shared_ptr<sf::Sprite> m_yellowBirdSprite;
     std::shared_ptr<sf::Sprite> m_plankSprite;
@@ -44,6 +47,9 @@ protected:
     std::unique_ptr<b2World> m_physicsWorld;
     std::unique_ptr<PhysicsContactListener> m_contactListener;
 	std::vector<std::unique_ptr<PhysicsObject>> m_physicsObjects;
+    std::unique_ptr<Slingshot> m_slingshot;
+
+    bool m_isLeftClicking = false;
     // -- //
 
 public:
@@ -61,6 +67,14 @@ public:
     ///     Called in the constructor to register all Commands.
     /// </summary>
     void registerCommands() override;
+
+    /// <summary>
+    ///     Check the given event against all Commands and their execution criterias.
+    /// </summary>
+    /// 
+    /// <param name="event">The raw SFML event.</param>
+    /// <param name="ctx">Context information provided for command execution.</param>
+    void handleEvent(const sf::Event& event, const CommandContext& ctx) override;
 
     /// <summary>
     ///     Create the Box2D Physics World.
@@ -87,7 +101,12 @@ public:
     std::vector<PhysicsObject*> getPhysicsObjects();
 
 // PROTECTED HELPER FUNCTIONS
-protected:
+protected:    
+    /// <summary>
+    ///     Safely remove joints, bodies, and the physics world.
+    /// </summary>
+    virtual void clearPhysicsWorld();
+
     /// <summary>
     ///     Load the assets, including textures and sprites.
     /// </summary>
@@ -99,6 +118,16 @@ protected:
     /// 
     /// <param name="position">2D position vector to spawn the plank.</param>
     /// <param name="rotation">The plank's rotation.</param>
-    /// <param name="health">Total health of the plank (default to 50).</param>
-    virtual void createPlank(b2Vec2 position, sf::Angle rotation, float health = 50.0f);
+    /// <param name="health">Total health of the plank (default to 20).</param>
+    virtual void createPlank(b2Vec2 position, sf::Angle rotation, float health = 25.0f);
+
+    /// <summary>
+    ///     Create the slingshot and load its initial projectile.
+    /// </summary>
+    virtual void createSlingshot();
+
+    /// <summary>
+    ///     Destroy the current physics world and rebuild this level.
+    /// </summary>
+    virtual void resetLevel();
 };
