@@ -11,11 +11,15 @@ Mail        : angelo.bohol@mds.ac.nz
 **************************************************************************/
 
 #include <iostream>
+#include <stdexcept>
 #include <SFML/Graphics.hpp>
 #include <box2d/box2d.h>
 #include "myproject/scenes/ScenePhysics.h"
 #include "myproject/core/Settings.h"
+#include "myproject/physics/PhysicsLibrary.h"
 #include "myproject/physics/PhysicsContactListener.h"
+#include "myproject/physics/Slingshot.h"
+#include "myproject/physics/BirdProjectile.h"
 
 ScenePhysics::ScenePhysics()
 {
@@ -27,16 +31,167 @@ ScenePhysics::ScenePhysics()
 }
 
 ScenePhysics::~ScenePhysics()
-{}
+{
+	this->clearPhysicsWorld();
+}
 
 void ScenePhysics::registerCommands()
 {
+	// -- Left Mouse Button Pressed -- //
+    this->m_commands.push_back({
+        // Execution Criteria
+        [](const sf::Event& event)
+        {
+			// First check if the Event was a Mouse Button Press, then check if the Mouse Button was the Left Mouse Button
+            if (const auto* mouse = event.getIf<sf::Event::MouseButtonPressed>())
+            {
+				return mouse->button == sf::Mouse::Button::Left;
+            }
 
+            // Otherwise, the event does not match the criteria.
+            return false;
+        },
+
+        // Command Action
+        [this](const CommandContext& ctx)
+        {
+			// Convert the Mouse Position to World Coordinates.
+			const sf::Vector2f mousePosition = ctx.window->mapPixelToCoords(sf::Mouse::getPosition(*ctx.window));
+
+			// Convert Pixels to Box2D Metres.
+			const b2Vec2 physicsPosition(
+				mousePosition.x / pl::sizeScale,
+				mousePosition.y / pl::sizeScale
+			);
+
+			// Only track a drag if the player clicked the bird.
+			this->m_isLeftClicking = this->m_slingshot->beginDrag(physicsPosition);
+
+			std::cout << (this->m_isLeftClicking ? "mouse dragging" : "not dragging") << std::endl;
+        }
+    });
+    // -- //
+
+	// -- Left Mouse Button Release -- //
+    this->m_commands.push_back({
+        // Execution Criteria
+        [](const sf::Event& event)
+        {
+			// First check if the Event was a Mouse Button Release, then check if the Mouse Button was the Left Mouse Button
+            if (const auto* mouse = event.getIf<sf::Event::MouseButtonReleased>())
+            {
+				return mouse->button == sf::Mouse::Button::Left;
+            }
+
+            // Otherwise, the event does not match the criteria.
+            return false;
+        },
+
+        // Command Action
+		[this](const CommandContext& ctx)
+		{
+			// Convert the Mouse Position to World Coordinates.
+			const sf::Vector2f mousePosition = ctx.window->mapPixelToCoords(sf::Mouse::getPosition(*ctx.window));
+
+			// Convert Pixels to Box2D Metres.
+			const b2Vec2 physicsPosition(
+				mousePosition.x / pl::sizeScale,
+				mousePosition.y / pl::sizeScale
+			);
+
+			// Update the final target, then release the bird.
+			this->m_slingshot->dragTo(physicsPosition);
+			this->m_slingshot->release();
+
+			this->m_isLeftClicking = false;
+		}
+    });
+    // -- //
+
+	// -- Space Key Pressed -- //
+    this->m_commands.push_back({
+        // Execution Criteria
+        [](const sf::Event& event)
+        {
+			// First check if the Event was a Key Press, then check if the Key was the Space Key
+            if (const auto* key = event.getIf<sf::Event::KeyPressed>())
+            {
+                return key->code == sf::Keyboard::Key::Space;
+            }
+
+            // Otherwise, the event does not match the criteria.
+            return false;
+        },
+
+        // Command Action
+        [this](const CommandContext& ctx)
+        {
+            // DEBUG
+            std::cout << "Space Key pressed, resetting the current level." << std::endl;
+
+            // Reset the Current Level
+            this->resetLevel();
+        }
+    });
+    // -- //
+}
+
+void ScenePhysics::handleEvent(const sf::Event& event, const CommandContext& ctx)
+{
+	// Call from the Base Class
+	Scene::handleEvent(event, ctx);
+
+	// Extend Functionality
+	// Ensure the Window and Slingshot exist.
+	if (ctx.window == nullptr || this->m_slingshot == nullptr)
+	{
+		return;
+	}
+
+	// -- Mouse Moved -- //
+	if (const auto* mouseMove =
+		event.getIf<sf::Event::MouseMoved>())
+	{
+		if (this->m_isLeftClicking == true)
+		{
+			// Convert the Mouse Position to World Coordinates.
+			const sf::Vector2f mousePosition =
+				ctx.window->mapPixelToCoords(mouseMove->position);
+
+			// Convert Pixels to Box2D Metres.
+			const b2Vec2 physicsPosition(
+				mousePosition.x / pl::sizeScale,
+				mousePosition.y / pl::sizeScale
+			);
+
+			// Update the Slingshot's Drag Target.
+			this->m_slingshot->dragTo(physicsPosition);
+		}
+
+		return;
+	}
+	// -- //
+
+	// -- Window Focus Lost -- //
+	if (event.is<sf::Event::FocusLost>())
+	{
+		// Avoid a stuck drag if the player leaves the window.
+		if (this->m_isLeftClicking == true)
+		{
+			this->m_slingshot->release();
+		}
+
+		this->m_isLeftClicking = false;
+	}
+	// -- //
 }
 
 void ScenePhysics::createPhysicsWorld()
 {
-	// Physics World
+	// Safely remove any previous world before rebuilding
+	this->clearPhysicsWorld();
+
+	// Create the Physics World
 	this->m_physicsWorld = std::make_unique<b2World>(b2Vec2(0.0f, 9.81f));
 	this->m_contactListener = std::make_unique<PhysicsContactListener>(this->m_physicsWorld.get(), this);
 	this->m_physicsWorld->SetContactListener(this->m_contactListener.get());
@@ -52,40 +207,62 @@ void ScenePhysics::createPhysicsWorld()
 			b2BodyType::b2_staticBody,
 			this->m_physicsWorld.get()
 		)
-	);
+	)->setHealth(1.0, true);
 
-	// Red Bird Physics Object
-	this->m_physicsObjects.emplace_back(
-		std::make_unique<PhysicsObject>(
-			b2Shape::e_circle,
-			this->m_redBirdSprite,
-			b2Vec2(1.0f, 1.0f),
-			b2Vec2(5.0f, 10.0f),
-			sf::degrees(0.0f),
-			b2BodyType::b2_dynamicBody,
-			this->m_physicsWorld.get()
-		)
-	)->setHealth(500.0f);
+	// Create the Slingshot
+	this->createSlingshot();
 }
-
 
 void ScenePhysics::update(StateContext ctx)
 {
+	// Ensure the Physics World exists.
+	if (this->m_physicsWorld == nullptr)
+	{
+		return;
+	}
+
+	// Time Step at 60FPS
+	constexpr float timeStep = 1.0f / 60.0f;
+
+	// Apply Slingshot Dragging Forces.
+	if (this->m_slingshot != nullptr)
+	{
+		this->m_slingshot->applyDragForce();
+	}
+
 	// Physics World Step
-	this->m_physicsWorld->Step(1.0f / 60.0f, 8, 3);
+	this->m_physicsWorld->Step(timeStep, 8, 3);
+
+	// Update the Slingshot after the Physics World Step.
+	if (this->m_slingshot != nullptr)
+	{
+		this->m_slingshot->update(timeStep);
+	}
 
 	// Remove Physics Objects that are marked for destruction
 	for (auto it = this->m_physicsObjects.begin(); it != this->m_physicsObjects.end();)
 	{
 		if ((*it)->isMarkedForDestroy())
+		{
 			it = this->m_physicsObjects.erase(it);
+		}
 		else
+		{
 			it++;
+		}
 	}
 }
 
 void ScenePhysics::render(StateContext ctx)
 {
+	// Draw the Slingshot and its Band.
+	if (this->m_slingshot != nullptr)
+	{
+		this->m_slingshot->draw(*ctx.window);
+		this->m_slingshot->drawBand(*ctx.window);
+	}
+
+	// Draw the Scene's Physics Objects.
 	for (auto& physicsObject : this->m_physicsObjects)
 	{
 		physicsObject->draw(*ctx.window);
@@ -103,11 +280,35 @@ std::vector<PhysicsObject*> ScenePhysics::getPhysicsObjects()
 	return physicsObjects;
 }
 
+void ScenePhysics::clearPhysicsWorld()
+{
+	// Reset Input State
+	this->m_isLeftClicking = false;
+
+	// Stop callbacks into the scene during cleanup.
+	if (this->m_physicsWorld != nullptr)
+	{
+		this->m_physicsWorld->SetContactListener(nullptr);
+	}
+
+	// Destroy the slingshot's joint before its connected bodies.
+	this->m_slingshot.reset();
+
+	// PhysicsObject destructors still need a valid world.
+	this->m_physicsObjects.clear();
+
+	// Destroy the world after all owned physics objects.
+	this->m_physicsWorld.reset();
+	this->m_contactListener.reset();
+}
+
 void ScenePhysics::loadAssets()
 {
 	// Load the Textures
 	if (this->m_groundTexture.loadFromFile("assets/textures/ground.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/ground.png'" << std::endl;
+	//if (this->m_slingshotTexture.loadFromFile("assets/textures/slingshot.png") == false)
+	//	std::cerr << "Error loading texture from 'assets/textures/slingshot.png'" << std::endl;
 	if (this->m_redBirdTexture.loadFromFile("assets/textures/red_bird.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/red_bird.png'" << std::endl;
 	if (this->m_yellowBirdTexture.loadFromFile("assets/textures/yellow_bird.png") == false)
@@ -117,7 +318,14 @@ void ScenePhysics::loadAssets()
 	if (this->m_plankTexture.loadFromFile("assets/textures/plank.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/plank.png'" << std::endl;
 
+	// -- TESTING SLINGSHOT IMAGE TEXTURE -- //
+	const sf::Image slingshotImage(sf::Vector2u(32u, 128u), sf::Color(130, 75, 35));
+	if (this->m_slingshotTexture.loadFromImage(slingshotImage) == false)
+		throw std::runtime_error("Error creating the slingshot placeholder texture.");
+	// -- //
+
 	// Create the Sprites
+	this->m_slingshotSprite = std::make_shared<sf::Sprite>(this->m_slingshotTexture);
 	this->m_groundSprite = std::make_shared<sf::Sprite>(this->m_groundTexture);
 	this->m_redBirdSprite = std::make_shared<sf::Sprite>(this->m_redBirdTexture);
 	this->m_yellowBirdSprite = std::make_shared<sf::Sprite>(this->m_yellowBirdTexture);
@@ -138,4 +346,34 @@ void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health
 			this->m_physicsWorld.get()
 		)
 	)->setHealth(health);
+}
+
+void ScenePhysics::createSlingshot()
+{
+	// Slingshot Physics Object
+	this->m_slingshot = std::make_unique<Slingshot>(
+		this->m_slingshotSprite,
+		b2Vec2(0.6f, 3.0f),
+		b2Vec2(5.0f, 12.5f),
+		this->m_physicsWorld.get()
+	);
+
+	// Bird Projectile
+	auto bird = std::make_unique<BirdProjectile>(
+		this->m_redBirdSprite,
+		this->m_slingshot->getAnchorPosition(),
+		this->m_physicsWorld.get()
+	);
+
+	// Attach the bird using the distance joint.
+	this->m_slingshot->loadBird(*bird);
+
+	// The scene owns the bird; the slingshot only borrows it.
+	this->m_physicsObjects.emplace_back(std::move(bird));
+}
+
+void ScenePhysics::resetLevel()
+{
+	// Simply rebuild the level
+	this->createPhysicsWorld();
 }
