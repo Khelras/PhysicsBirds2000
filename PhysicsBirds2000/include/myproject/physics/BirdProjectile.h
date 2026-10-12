@@ -28,7 +28,9 @@ public:
     };
 
 private:
+    // -- Bird Projectile Properties -- //
     State m_state = State::Loaded;
+    // -- //
 
 public:
     /// <summary>
@@ -41,9 +43,16 @@ public:
     BirdProjectile(std::shared_ptr<sf::Sprite> sprite, b2Vec2 position, b2World* physicsWorld);
 
     /// <summary>
-    ///     Destructor
+    ///     Destructor.
     /// </summary>
-    ~BirdProjectile();
+    ~BirdProjectile() override;
+
+    /// <summary>
+    ///     Prepares the bird projectile physics object for loading onto the slingshot.
+    /// </summary>
+    /// 
+    /// <param name="position">2D vector position of the anchor/launch point of the slingshot.</param>
+    void prepareForLoading(b2Vec2 position);
 
     /// <summary>
     ///     Start dragging the bird projectile.

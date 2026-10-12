@@ -17,13 +17,29 @@ BirdProjectile::BirdProjectile(std::shared_ptr<sf::Sprite> sprite, b2Vec2 positi
 {
     this->m_body->SetFixedRotation(true);
     this->m_body->SetBullet(true);
+    this->m_body->SetGravityScale(0.0f);
     
     // Bird has 500 health
+    this->m_isIndustructible = true; // Prevents the Slingshot from damaging the bird
     this->m_health = 500.0f;
 }
 
 BirdProjectile::~BirdProjectile()
 {}
+
+void BirdProjectile::prepareForLoading(b2Vec2 position)
+{
+    // Set to a Loaded State
+    this->m_state = BirdProjectile::State::Loaded;
+
+    // Set the Bird Projectile to be a Dynamic Body and ready for Launching
+    this->getBody()->SetType(b2_dynamicBody);
+    this->getBody()->SetGravityScale(0.0f);
+    this->getBody()->SetTransform(position, 0.0f);
+    this->getBody()->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
+    this->getBody()->SetAngularVelocity(0.0f);
+    this->getBody()->SetAwake(true);
+}
 
 void BirdProjectile::beginDrag()
 {
@@ -43,14 +59,17 @@ void BirdProjectile::moveTo(b2Vec2 position)
 
 void BirdProjectile::beginLaunch()
 {
-    // Bird Projectile is now a Dynamic Body
-    this->m_body->SetType(b2_dynamicBody);
-    this->m_body->SetGravityScale(0.0f); // No gravity during initial launch
-    this->m_body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
-    this->m_body->SetAwake(true);
-
     // Bird Projectile in a Launching State
     this->m_state = BirdProjectile::State::Launching;
+
+    // No gravity during initial launch
+    this->getBody()->SetGravityScale(0.0f);
+
+    // Launch energy comes from the distance-joint spring,
+    // rather than any velocity left over from dragging.
+    this->getBody()->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
+    this->getBody()->SetAngularVelocity(0.0f);
+    this->getBody()->SetAwake(true);
 }
 
 void BirdProjectile::finishLaunch()
