@@ -167,7 +167,7 @@ void Slingshot::release()
     b2LinearStiffness(
         stiffness, // Sets the Stiffness
         damping, // Sets the Damping
-        2.5f, // Frequency in Hz
+        1.5f, // Frequency in Hz
         0.10f, // Damping Ratio
         this->getBody(),
         this->m_bird->getBody()

@@ -449,7 +449,7 @@ void ScenePhysics::createSlingshot()
 	this->m_slingshot = std::make_unique<Slingshot>(
 		this->m_slingshotSprite,
 		b2Vec2(0.6f, 3.0f),
-		b2Vec2(5.0f, 12.5f),
+		b2Vec2(3.5f, 12.5f),
 		this->m_physicsWorld.get()
 	);
 
