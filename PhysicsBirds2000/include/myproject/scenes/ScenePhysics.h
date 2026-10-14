@@ -158,15 +158,15 @@ protected:
     /// <param name="position">2D position vector to spawn the plank.</param>
     /// <param name="rotation">The plank's rotation.</param>
     /// <param name="health">Total health of the plank (default to 20).</param>
-    void createPlank(b2Vec2 position, sf::Angle rotation, float health = 25.0f);
+    void createPlank(b2Vec2 position, sf::Angle rotation, float health = 20.0f);
 
     /// <summary>
     ///     Create a enemy pig physics object at the given position.
     /// </summary>
     /// 
     /// <param name="position">2D position vector to spawn the enemy pig.</param>
-    /// <param name="health">Total health of the enemy pig (default to 15).</param>
-    void createEnemyPig(b2Vec2 position, float health = 15);
+    /// <param name="health">Total health of the enemy pig (default to 10).</param>
+    void createEnemyPig(b2Vec2 position, float health = 10);
 
     /// <summary>
     ///     Load the next bird projectile onto the slingshot.

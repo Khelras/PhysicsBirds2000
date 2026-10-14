@@ -527,7 +527,12 @@ void ScenePhysics::loadNextBird()
 		// Yellow Bird
 		case (BirdType::Yellow):
 		{
-			// TODO: Speed Boost
+			// Speed Boost
+			bird->setAbility([](BirdProjectile& self)
+			{
+				b2Body* body = self.getBody();
+				body->SetLinearVelocity(2.75f * body->GetLinearVelocity());
+			});
 		} break;
 
 		// Green Bird
