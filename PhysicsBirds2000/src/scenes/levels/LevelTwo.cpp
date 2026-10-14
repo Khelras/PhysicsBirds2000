@@ -20,6 +20,11 @@ LevelTwo::LevelTwo()
 LevelTwo::~LevelTwo()
 {}
 
+void LevelTwo::onExit()
+{
+    this->resetLevel();
+}
+
 void LevelTwo::createPhysicsWorld()
 {
     // Call from the base class
@@ -40,7 +45,10 @@ void LevelTwo::createPhysicsWorld()
 void LevelTwo::goToNextLevel(StateContext ctx)
 {
     // DEBUG
-    std::cout << "Player Wins!!!" << std::endl;
+    std::cout << "Player Wins!!! Restarting Game..." << std::endl;
+
+    // Go back to Level One
+    ctx.sceneManager->goToScene("LevelOne");
 }
 
 void LevelTwo::createWeldedTee(b2Vec2 position)

@@ -19,6 +19,11 @@ LevelOne::LevelOne()
 LevelOne::~LevelOne()
 {}
 
+void LevelOne::onExit()
+{
+    this->resetLevel();
+}
+
 void LevelOne::createPhysicsWorld()
 {
 	// Call from the base class

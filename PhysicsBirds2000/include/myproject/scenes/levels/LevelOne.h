@@ -35,6 +35,12 @@ public:
 	~LevelOne();
 
 	/// <summary>
+	///     Called when the Scene is being exited or replaced.
+	///     Use for cleanup upon exiting.
+	/// </summary>
+	void onExit() override;
+
+	/// <summary>
 	///     Create the Box2D Physics World.
 	/// </summary>
 	void createPhysicsWorld() override;
