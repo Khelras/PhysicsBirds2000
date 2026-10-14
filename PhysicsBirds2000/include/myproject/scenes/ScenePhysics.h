@@ -36,6 +36,7 @@ protected:
     sf::Texture m_greenBirdTexture;
     sf::Texture m_pigTexture;
     sf::Texture m_plankTexture;
+    sf::Texture m_concreteTexture;
 
     // Sprites
     std::shared_ptr<sf::Sprite> m_groundSprite;
@@ -45,6 +46,7 @@ protected:
     std::shared_ptr<sf::Sprite> m_greenBirdSprite;
     std::shared_ptr<sf::Sprite> m_pigSprite;
     std::shared_ptr<sf::Sprite> m_plankSprite;
+    std::shared_ptr<sf::Sprite> m_concreteSprite;
 
     // Physics
     std::unique_ptr<b2World> m_physicsWorld;
@@ -159,6 +161,14 @@ protected:
     /// <param name="rotation">The plank's rotation.</param>
     /// <param name="health">Total health of the plank (default to 20).</param>
     void createPlank(b2Vec2 position, sf::Angle rotation, float health = 20.0f);
+
+    /// <summary>
+    ///     Create an indestructible concrete physics object at the given position and rotation.
+    /// </summary>
+    /// 
+    /// <param name="position">2D position vector to spawn the concrete.</param>
+    /// <param name="rotation">The concrete's rotation.</param>
+    void createConcrete(b2Vec2 position, sf::Angle rotation);
 
     /// <summary>
     ///     Create a enemy pig physics object at the given position.

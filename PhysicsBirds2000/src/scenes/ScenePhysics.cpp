@@ -395,6 +395,9 @@ void ScenePhysics::loadAssets()
 	if (this->m_plankTexture.loadFromFile("assets/textures/plank.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/plank.png'" << std::endl;
 
+	if (this->m_concreteTexture.loadFromFile("assets/textures/concrete.png") == false)
+		std::cerr << "Error loading texture from 'assets/textures/concrete.png'" << std::endl;
+
 	// -- SLINGSHOT PLACEHOLDER IMAGE TEXTURE -- //
 	const sf::Image slingshotImage(sf::Vector2u(32u, 128u), sf::Color(130, 75, 35));
 	if (this->m_slingshotTexture.loadFromImage(slingshotImage) == false)
@@ -409,6 +412,7 @@ void ScenePhysics::loadAssets()
 	this->m_greenBirdSprite = std::make_shared<sf::Sprite>(this->m_greenBirdTexture);
 	this->m_pigSprite = std::make_shared<sf::Sprite>(this->m_pigTexture);
 	this->m_plankSprite = std::make_shared<sf::Sprite>(this->m_plankTexture);
+	this->m_concreteSprite = std::make_shared<sf::Sprite>(this->m_concreteTexture);
 }
 
 void ScenePhysics::updateLevelSettling(float timeStep)
@@ -472,6 +476,22 @@ void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health
 			this->m_physicsWorld.get()
 		)
 	)->setHealth(health);
+}
+
+void ScenePhysics::createConcrete(b2Vec2 position, sf::Angle rotation)
+{
+	// Create an indestructible Concrete Physics Object
+	this->m_physicsObjects.emplace_back(
+		std::make_unique<PhysicsObject>(
+			b2Shape::e_polygon,
+			this->m_concreteSprite,
+			b2Vec2(0.375f, 2.25f),
+			position,
+			rotation,
+			b2BodyType::b2_dynamicBody,
+			this->m_physicsWorld.get()
+		)
+	)->setHealth(1.0f, true);
 }
 
 void ScenePhysics::createEnemyPig(b2Vec2 position, float health)

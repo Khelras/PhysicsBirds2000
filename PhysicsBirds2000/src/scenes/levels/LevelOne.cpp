@@ -24,13 +24,13 @@ void LevelOne::createPhysicsWorld()
 	ScenePhysics::createPhysicsWorld();
 
 	// Extend Functionality
-	// Create PLanks
-	this->createPlank(b2Vec2(18.25f, 13.375f), sf::degrees(0.0f));
+	// Create Planks and Concretes
+	this->createConcrete(b2Vec2(18.25f, 13.375f), sf::degrees(0.0f));
 	this->createPlank(b2Vec2(19.75f, 13.375f), sf::degrees(0.0f));
 	this->createPlank(b2Vec2(19.0f, 12.0625f), sf::degrees(90.0f));
 
 	this->createPlank(b2Vec2(18.25f, 10.75f), sf::degrees(0.0f));
-	this->createPlank(b2Vec2(19.75f, 10.75f), sf::degrees(0.0f));
+	this->createConcrete(b2Vec2(19.75f, 10.75f), sf::degrees(0.0f));
 	this->createPlank(b2Vec2(19.0f, 9.4375f), sf::degrees(90.0f));
 
 	// Create Enemies
