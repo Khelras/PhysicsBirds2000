@@ -309,7 +309,7 @@ void ScenePhysics::update(StateContext ctx)
 	}
 
 	// Check if the next bird should be loaded.
-	this->updateBirdLoading(timeStep);
+	this->updateBirdLoading(timeStep, ctx);
 }
 
 void ScenePhysics::render(StateContext ctx)
@@ -651,7 +651,7 @@ void ScenePhysics::drawBirdQueue(sf::RenderWindow& window) const
 	}
 }
 
-void ScenePhysics::updateBirdLoading(float timeStep)
+void ScenePhysics::updateBirdLoading(float timeStep, StateContext ctx)
 {
 	// Only track a Bird Projectile that has actually been launched
 	if (this->m_activeBird == nullptr || this->m_slingshot == nullptr) return;
@@ -700,29 +700,24 @@ void ScenePhysics::updateBirdLoading(float timeStep)
 		// Stop tracking the recently launched Bird Projectile
 		this->m_activeBird = nullptr;
 
+		// DEBUG
+		std::cout << "Enemies remaining: " << this->m_enemies.size() << std::endl;
+
 		// Check how many Enemies remain before loading the next Bird Projectile
-		this->checkEnemiesRemaining();
-		if (this->m_enemies.empty() == true) return;
+		if (this->m_enemies.empty() == true)
+		{
+			// DEBUG
+			std::cout << "All enemies defeated! Level complete." << std::endl;
+
+			// Go to the next level
+			this->goToNextLevel(ctx);
+
+			this->m_activeBird = nullptr;
+			return;
+		}
 
 		// Load the next bird
 		this->loadNextBird();
-	}
-}
-
-void ScenePhysics::checkEnemiesRemaining()
-{
-	// DEBUG
-	std::cout << "Enemies remaining: " << this->m_enemies.size() << std::endl;
-
-	if (this->m_enemies.empty() == true)
-	{
-		// DEBUG
-		std::cout << "All enemies defeated! Level complete." << std::endl;
-
-		// TODO: Go to the next level or show the win screen.
-
-		this->m_activeBird = nullptr;
-		return;
 	}
 }
 

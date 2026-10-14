@@ -31,6 +31,16 @@ struct StateContext
     ///     Delta Time for calculations relative to time.
     /// </summary>
     float dt;
+
+    /// <summary>
+    ///     Pointer to the State Manager.
+    /// </summary>
+    class StateManager* stateManager;
+
+    /// <summary>
+    ///     Pointer to the Scene Manager.
+    /// </summary>
+    class SceneManager* sceneManager;
 };
 
 

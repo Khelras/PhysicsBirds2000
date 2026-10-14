@@ -116,12 +116,16 @@ void StateMain::handleEvent(const sf::Event& event, CommandContext& ctx)
 
 void StateMain::update(StateContext ctx)
 {
-	this->m_sceneManager->update(ctx);
+	StateContext context = ctx;
+	context.sceneManager = this->m_sceneManager;
+	this->m_sceneManager->update(context);
 }
 
 void StateMain::render(StateContext ctx)
 {
-	this->m_sceneManager->render(ctx);
+	StateContext context = ctx;
+	context.sceneManager = this->m_sceneManager;
+	this->m_sceneManager->render(context);
 }
 
 sf::Color StateMain::getBackgroundColor()

@@ -42,6 +42,11 @@ public:
 // PRIVATE HELPER FUNCTIONS
 private:
 	/// <summary>
+	///     Go to the next level.
+	/// </summary>
+	void goToNextLevel(StateContext ctx) override;
+
+	/// <summary>
 	/// 	Create a lever.
 	/// </summary>
 	/// 

@@ -10,7 +10,9 @@ Author      : Angelo Joseph Arawiran Bohol
 Mail        : angelo.bohol@mds.ac.nz
 **************************************************************************/
 
+#include <iostream>
 #include "myproject/scenes/levels/LevelTwo.h"
+#include "myproject/managers/SceneManager.h"
 
 LevelTwo::LevelTwo()
 {}
@@ -33,6 +35,12 @@ void LevelTwo::createPhysicsWorld()
     this->createEnemyPig(b2Vec2(10.0f, 11.5f));
     this->createEnemyPig(b2Vec2(15.0f, 11.5f));
     this->createEnemyPig(b2Vec2(20.0f, 11.5f));
+}
+
+void LevelTwo::goToNextLevel(StateContext ctx)
+{
+    // DEBUG
+    std::cout << "Player Wins!!!" << std::endl;
 }
 
 void LevelTwo::createWeldedTee(b2Vec2 position)

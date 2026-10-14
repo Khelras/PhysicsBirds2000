@@ -70,6 +70,8 @@ void Window::process()
 	this->m_commandContext->stateManager = &this->m_stateManager;
 	this->m_commandContext->sceneManager = nullptr; // Set within the State
 	this->m_stateContext->window = this;
+	this->m_stateContext->stateManager = &this->m_stateManager;
+	this->m_stateContext->sceneManager = nullptr; // Set within the State
 
 	// Clock
 	sf::Clock clock;

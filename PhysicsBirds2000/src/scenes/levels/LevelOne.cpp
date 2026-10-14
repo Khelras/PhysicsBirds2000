@@ -11,7 +11,7 @@ Mail        : angelo.bohol@mds.ac.nz
 **************************************************************************/
 
 #include "myproject/scenes/levels/LevelOne.h"
-
+#include "myproject/managers/SceneManager.h"
 
 LevelOne::LevelOne()
 {}
@@ -49,6 +49,11 @@ void LevelOne::createPhysicsWorld()
 	this->createEnemyPig(b2Vec2(19.0f, 14.125f));
 	this->createEnemyPig(b2Vec2(19.0f, 11.5f));
 	this->createEnemyPig(b2Vec2(13.125f, 10.0f));
+}
+
+void LevelOne::goToNextLevel(StateContext ctx)
+{
+    ctx.sceneManager->goToScene("LevelTwo");
 }
 
 void LevelOne::createLever(b2Vec2 position)

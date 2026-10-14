@@ -42,7 +42,12 @@ public:
 // PRIVATE HELPER FUNCTIONS
 private:
 	/// <summary>
-	/// Create a T-shaped structure: a post and a top plank held together with a Weld Joint.
+	///     Go to the next level.
+	/// </summary>
+	void goToNextLevel(StateContext ctx) override;
+
+	/// <summary>
+	///		Create a T-shaped structure: a post and a top plank held together with a Weld Joint.
 	/// </summary>
 	/// 
 	/// <param name="position">Position of the post's centre (the post stands on the ground).</param>

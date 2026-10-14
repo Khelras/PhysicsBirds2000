@@ -202,6 +202,7 @@ protected:
     /// <summary>
     /// Draw the birds waiting to be launched in a line behind the slingshot (visual only).
     /// </summary>
+    /// 
     /// <param name="window">Reference to the render window target.</param>
     void drawBirdQueue(sf::RenderWindow& window) const;
 
@@ -209,12 +210,12 @@ protected:
     ///     Check whether the current bird projectile in flight has settled.
     ///     If so, load the next bird projectile onto the slingshot.
     /// </summary>
-    void updateBirdLoading(float timeStep);
+    void updateBirdLoading(float timeStep, StateContext ctx);
 
     /// <summary>
-    ///     Check how many enemies remain in the scene and log the level progress.
+    ///     Go to the next level.
     /// </summary>
-    void checkEnemiesRemaining();
+    virtual void goToNextLevel(StateContext ctx) {};
 
     /// <summary>
     ///     Destroy the current physics world and rebuild this level.
