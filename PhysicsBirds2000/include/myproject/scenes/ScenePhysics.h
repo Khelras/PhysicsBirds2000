@@ -138,6 +138,11 @@ protected:
     virtual void clearPhysicsWorld();
 
     /// <summary>
+    ///     Reset the gameplay state (input, level settling, and bird loading) so the game loop starts again.
+    /// </summary>
+    virtual void resetGameplayState();
+
+    /// <summary>
     ///     Load the assets, including textures and sprites.
     /// </summary>
     virtual void loadAssets();
@@ -214,7 +219,7 @@ protected:
     /// <summary>
     ///     Destroy the current physics world and rebuild this level.
     /// </summary>
-    virtual void resetLevel();
+    void resetLevel();
 
 // PROTECTED HELPER FOR THE GREEN BIRD
 protected:

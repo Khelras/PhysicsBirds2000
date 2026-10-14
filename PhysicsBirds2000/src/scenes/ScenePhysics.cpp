@@ -233,6 +233,9 @@ void ScenePhysics::createPhysicsWorld()
 	// Safely remove any previous world before rebuilding
 	this->clearPhysicsWorld();
 
+	// Restart the gameplay loop (settling state, bird loading, and input).
+	this->resetGameplayState();
+
 	// Create the Physics World
 	this->m_physicsWorld = std::make_unique<b2World>(pl::gravity);
 	this->m_contactListener = std::make_unique<PhysicsContactListener>(this->m_physicsWorld.get(), this);
@@ -369,6 +372,21 @@ void ScenePhysics::clearPhysicsWorld()
 	// Reset the world after clearig all Physics Objects
 	this->m_physicsWorld.reset();
 	this->m_contactListener.reset();
+}
+
+void ScenePhysics::resetGameplayState()
+{
+	// Reset Input State
+	this->m_isLeftClicking = false;
+
+	// The level must settle again before the first bird is loaded.
+	this->m_isLevelSettling = true;
+	this->m_levelSettleTime = 0.0f;
+
+	// Reset Bird Loading State
+	this->m_activeBird = nullptr;
+	this->m_birdFlightTime = 0.0f;
+	this->m_birdStillTime = 0.0f;
 }
 
 void ScenePhysics::loadAssets()
@@ -523,10 +541,10 @@ void ScenePhysics::loadNextBird()
 	if (this->m_birdStack.empty() == true)
 	{
 		// DEBUG
-		std::cout << "No birds remaining." << std::endl;
+		std::cout << "No birds remaining. Restarting Level..." << std::endl;
 
-		// TODO: Show the lose screen and allow a restart.
-
+		// Simply Restart the Level
+		this->resetLevel();
 		this->m_activeBird = nullptr;
 		return;
 	}
@@ -710,7 +728,7 @@ void ScenePhysics::checkEnemiesRemaining()
 
 void ScenePhysics::resetLevel()
 {
-	// Simply rebuild the level
+	// Re-create the Physics World
 	this->createPhysicsWorld();
 }
 
