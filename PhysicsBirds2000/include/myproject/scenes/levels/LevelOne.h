@@ -20,8 +20,7 @@ class LevelOne : public ScenePhysics
 {
 private:
 	// -- Level One Properties -- //
-	PhysicsObject* m_hangingPlatform = nullptr;   // Non-owning, the scene owns the plank
-	b2Vec2 m_ropeAnchorPosition = b2Vec2(0.0f, 0.0f);
+	
 	// -- //
 
 public:

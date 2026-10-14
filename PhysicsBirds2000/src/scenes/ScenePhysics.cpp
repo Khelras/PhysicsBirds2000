@@ -462,10 +462,10 @@ void ScenePhysics::createSlingshot()
 	this->m_birdStack = { BirdType::Green, BirdType::Yellow, BirdType::Red };
 }
 
-void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health)
+PhysicsObject* ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health)
 {
 	// Create the Plank Physics Object
-	this->m_physicsObjects.emplace_back(
+	PhysicsObject* plank = this->m_physicsObjects.emplace_back(
 		std::make_unique<PhysicsObject>(
 			b2Shape::e_polygon,
 			this->m_plankSprite,
@@ -475,7 +475,10 @@ void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health
 			b2BodyType::b2_dynamicBody,
 			this->m_physicsWorld.get()
 		)
-	)->setHealth(health);
+	).get();
+
+	plank->setHealth(health);
+	return plank;
 }
 
 void ScenePhysics::createConcrete(b2Vec2 position, sf::Angle rotation)

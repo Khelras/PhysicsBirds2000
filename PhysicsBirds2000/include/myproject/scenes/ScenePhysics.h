@@ -160,7 +160,11 @@ protected:
     /// <param name="position">2D position vector to spawn the plank.</param>
     /// <param name="rotation">The plank's rotation.</param>
     /// <param name="health">Total health of the plank (default to 20).</param>
-    void createPlank(b2Vec2 position, sf::Angle rotation, float health = 20.0f);
+    /// 
+    /// <returns>
+    ///     Raw pointer to the plank physics object.
+    /// </returns>
+    PhysicsObject* createPlank(b2Vec2 position, sf::Angle rotation, float health = 20.0f);
 
     /// <summary>
     ///     Create an indestructible concrete physics object at the given position and rotation.

@@ -33,4 +33,18 @@ public:
 	///		Destructor.
 	/// </summary>
 	~LevelTwo();
+
+	/// <summary>
+	///     Create the Box2D Physics World.
+	/// </summary>
+	void createPhysicsWorld() override;
+
+// PRIVATE HELPER FUNCTIONS
+private:
+	/// <summary>
+	/// Create a T-shaped structure: a post and a top plank held together with a Weld Joint.
+	/// </summary>
+	/// 
+	/// <param name="position">Position of the post's centre (the post stands on the ground).</param>
+	void createWeldedTee(b2Vec2 position);
 };
