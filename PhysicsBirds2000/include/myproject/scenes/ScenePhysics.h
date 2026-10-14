@@ -14,13 +14,12 @@ Mail        : angelo.bohol@mds.ac.nz
 #include <memory>
 #include <vector>
 #include "myproject/scenes/Scene.h"
-#include "myproject/physics/PhysicsObject.h"
+#include "myproject/physics/BirdProjectile.h"
 
 // Forward Declarations
 class b2World;
 class PhysicsContactListener;
 class Slingshot;
-class BirdProjectile;
 
 /// <summary>
 ///     The base physics scene which derives from the base scene class.
@@ -60,8 +59,11 @@ protected:
     bool m_isLeftClicking = false;
 
     BirdProjectile* m_activeBird = nullptr;
-    int m_maxBirds = 3;
-    int m_birdsRemaining = 0;
+    std::vector<BirdType> m_birdStack;
+
+    float m_birdQueueOffsetX = 1.5f; // Distance behind the slingshot to the first waiting bird
+    float m_birdQueueSpacing = 1.2f; // Distance between waiting birds
+    float m_birdQueueY = 13.5f; // Resting height (ground top is 14, bird radius is 0.5)
 
     float m_birdFlightTime = 0.0f;
     float m_birdStillTime = 0.0f;
@@ -161,6 +163,7 @@ protected:
     /// <summary>
     ///     Create a enemy pig physics object at the given position.
     /// </summary>
+    /// 
     /// <param name="position">2D position vector to spawn the enemy pig.</param>
     /// <param name="health">Total health of the enemy pig (default to 15).</param>
     void createEnemyPig(b2Vec2 position, float health = 15);
@@ -169,6 +172,19 @@ protected:
     ///     Load the next bird projectile onto the slingshot.
     /// </summary>
     void loadNextBird();
+
+    /// <summary>
+    ///     Get the sprite of the given bird type.
+    /// </summary>
+    /// 
+    /// <param name="type">The type of bird.</param>
+    std::shared_ptr<sf::Sprite> getBirdSprite(BirdType type) const;
+
+    /// <summary>
+    /// Draw the birds waiting to be launched in a line behind the slingshot (visual only).
+    /// </summary>
+    /// <param name="window">Reference to the render window target.</param>
+    void drawBirdQueue(sf::RenderWindow& window) const;
 
     /// <summary>
     ///     Check whether the current bird projectile in flight has settled.

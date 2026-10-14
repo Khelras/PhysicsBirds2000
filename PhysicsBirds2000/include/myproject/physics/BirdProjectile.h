@@ -13,6 +13,19 @@ Mail        : angelo.bohol@mds.ac.nz
 #pragma once
 #include "myproject/physics/PhysicsObject.h"
 
+/// <summary>
+/// The types of bird projectiles, the values match the order they appear in the Slingshot queue.
+/// </summary>
+enum class BirdType : int
+{
+    Red = 1,
+    Yellow = 2,
+    Green = 3
+};
+
+/// <summary>
+///     Bird Projectile class.
+/// </summary>
 class BirdProjectile : public PhysicsObject
 {
 public:

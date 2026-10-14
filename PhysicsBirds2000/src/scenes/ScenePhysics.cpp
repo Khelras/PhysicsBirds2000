@@ -279,6 +279,9 @@ void ScenePhysics::render(StateContext ctx)
 		this->m_slingshot->drawBand(*ctx.window);
 	}
 
+	// Draw the Birds waiting in line behind the Slingshot.
+	this->drawBirdQueue(*ctx.window);
+
 	// Draw the Scene's Physics Objects.
 	for (auto& physicsObject : this->m_physicsObjects)
 	{
@@ -301,7 +304,7 @@ void ScenePhysics::clearPhysicsWorld()
 {
 	// Reset Bird Loading State
 	this->m_activeBird = nullptr;
-	this->m_birdsRemaining = 0;
+	this->m_birdStack.clear();
 	this->m_birdFlightTime = 0.0f;
 	this->m_birdStillTime = 0.0f;
 
@@ -411,8 +414,8 @@ void ScenePhysics::createSlingshot()
 		this->m_physicsWorld.get()
 	);
 
-	// Start with a full set of bird projectiles and load the first one.
-	this->m_birdsRemaining = this->m_maxBirds;
+	// Fill the Bird Projectile stack, the back of the stack is loaded first (Red -> Yellow -> Green).
+	this->m_birdStack = { BirdType::Green, BirdType::Yellow, BirdType::Red };
 }
 
 void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health)
@@ -453,19 +456,25 @@ void ScenePhysics::createEnemyPig(b2Vec2 position, float health)
 
 void ScenePhysics::loadNextBird()
 {
-	// Check if there are any birds left to load.
-	if (this->m_birdsRemaining <= 0)
+	// Check if there are any Bird Projectiles left to load.
+	if (this->m_birdStack.empty() == true)
 	{
 		// DEBUG
 		std::cout << "No birds remaining." << std::endl;
+
+		// TODO: Show the lose screen and allow a restart.
 
 		this->m_activeBird = nullptr;
 		return;
 	}
 
+	// Pop the next bird type from the stack.
+	const BirdType birdType = this->m_birdStack.back();
+	this->m_birdStack.pop_back();
+
 	// Bird Projectile
 	auto bird = std::make_unique<BirdProjectile>(
-		this->m_redBirdSprite,
+		this->getBirdSprite(birdType),
 		this->m_slingshot->getAnchorPosition(),
 		this->m_physicsWorld.get()
 	);
@@ -477,13 +486,57 @@ void ScenePhysics::loadNextBird()
 	this->m_activeBird = bird.get();
 	this->m_physicsObjects.emplace_back(std::move(bird));
 
-	// Update the Bird Loading State
-	this->m_birdsRemaining--;
+	// Update the Bird Projectile Loading State
 	this->m_birdFlightTime = 0.0f;
 	this->m_birdStillTime = 0.0f;
 
 	// DEBUG
-	std::cout << "Bird loaded. Birds remaining after this one: " << this->m_birdsRemaining << std::endl;
+	std::cout << "Bird loaded. Birds remaining after this one: " << this->m_birdStack.size() << std::endl;
+}
+
+std::shared_ptr<sf::Sprite> ScenePhysics::getBirdSprite(BirdType type) const
+{
+	switch (type)
+	{
+		case (BirdType::Red): return this->m_redBirdSprite;
+		case (BirdType::Yellow): return this->m_yellowBirdSprite;
+		case (BirdType::Green): return this->m_greenBirdSprite;
+		default: return this->m_redBirdSprite;
+	}
+}
+
+void ScenePhysics::drawBirdQueue(sf::RenderWindow& window) const
+{
+	// The queue is positioned relative to the slingshot.
+	if (this->m_slingshot == nullptr) return;
+	const float queueStartX = this->m_slingshot->getAnchorPosition().x - this->m_birdQueueOffsetX;
+
+	// Draw from the next bird (back of the stack) outwards, away from the slingshot
+	for (size_t i = 0; i < this->m_birdStack.size(); i++)
+	{
+		const BirdType birdType = this->m_birdStack[this->m_birdStack.size() - 1 - i];
+		std::shared_ptr<sf::Sprite> sprite = this->getBirdSprite(birdType);
+
+		// Scale of the Sprite (birds are 1 metre wide, matching the BirdProjectile)
+		const sf::Vector2u textureSize = sprite->getTexture().getSize();
+		const sf::Vector2f spriteScale(
+			1.0f * pl::sizeScale / static_cast<float>(textureSize.x),
+			1.0f * pl::sizeScale / static_cast<float>(textureSize.y)
+		);
+
+		// Set the Sprite's Scale, Origin, Position, and Rotation
+		// Sprites are shared with the flying bird, so every property is set before drawing
+		sprite->setScale(spriteScale);
+		sprite->setOrigin(sprite->getLocalBounds().getCenter());
+		sprite->setRotation(sf::degrees(0.0f));
+		sprite->setPosition({
+			(queueStartX - static_cast<float>(i) * this->m_birdQueueSpacing) * pl::sizeScale,
+			this->m_birdQueueY * pl::sizeScale
+		});
+
+		// Draw the Sprite
+		window.draw(*sprite);
+	}
 }
 
 void ScenePhysics::updateBirdLoading(float timeStep)
