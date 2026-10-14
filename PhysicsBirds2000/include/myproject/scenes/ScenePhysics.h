@@ -53,6 +53,10 @@ protected:
 	std::vector<std::unique_ptr<PhysicsObject>> m_physicsObjects;
     std::unique_ptr<Slingshot> m_slingshot;
 
+    bool m_isLevelSettling = true;
+    float m_levelSettleTime = 0.0f;
+    float m_maxLevelSettleTime = 3.0f;
+
     bool m_isLeftClicking = false;
 
     BirdProjectile* m_activeBird = nullptr;
@@ -117,6 +121,11 @@ public:
     /// </returns>
     std::vector<PhysicsObject*> getPhysicsObjects();
 
+    /// <summary>
+    ///     Whether the level is still settling after loading (impacts are ignored while true).
+    /// </summary>
+    inline bool isLevelSettling() const { return this->m_isLevelSettling; };
+
 // PROTECTED HELPER FUNCTIONS
 protected:    
     /// <summary>
@@ -128,6 +137,12 @@ protected:
     ///     Load the assets, including textures and sprites.
     /// </summary>
     virtual void loadAssets();
+
+    /// <summary>
+    ///     Update the level settling state after loading.
+    ///     This state ends once everything is at rest.
+    /// </summary>
+    void updateLevelSettling(float timeStep);
 
     /// <summary>
     ///     Create the slingshot and load its initial projectile.

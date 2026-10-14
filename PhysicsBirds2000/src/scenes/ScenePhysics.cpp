@@ -55,6 +55,9 @@ void ScenePhysics::registerCommands()
         // Command Action
         [this](const CommandContext& ctx)
         {
+			// Check if the Level is still settling
+			if (this->m_isLevelSettling == true) return;
+
 			// Convert the Mouse Position to World Coordinates.
 			const sf::Vector2f mousePosition = ctx.window->mapPixelToCoords(sf::Mouse::getPosition(*ctx.window));
 
@@ -234,6 +237,9 @@ void ScenePhysics::update(StateContext ctx)
 	// Physics World Step
 	this->m_physicsWorld->Step(timeStep, 8, 3);
 
+	// Level Settling State Update
+	this->updateLevelSettling(timeStep);
+
 	// Update the Slingshot after the Physics World Step.
 	if (this->m_slingshot != nullptr)
 	{
@@ -362,6 +368,39 @@ void ScenePhysics::loadAssets()
 	this->m_plankSprite = std::make_shared<sf::Sprite>(this->m_plankTexture);
 }
 
+void ScenePhysics::updateLevelSettling(float timeStep)
+{
+	// Ensure the Level is in a settling state
+	if (this->m_isLevelSettling == false) return;
+
+	this->m_levelSettleTime += timeStep;
+
+	// Loop through every dynamic body and check if it has fallen asleep
+	bool isAtRest = true;
+	for (b2Body* body = this->m_physicsWorld->GetBodyList(); body != nullptr; body = body->GetNext())
+	{
+		// Check if this dynamic body is awake
+		if (body->GetType() == b2BodyType::b2_dynamicBody && body->IsAwake() == true)
+		{
+			// If at least 1 dynamic body is awake then this check fails
+			isAtRest = false;
+			break;
+		}
+	}
+
+	// Check if the level has settled (all dynamic bodies are at rest)
+	if (isAtRest == true || this->m_levelSettleTime >= this->m_maxLevelSettleTime)
+	{
+		this->m_isLevelSettling = false;
+
+		// DEBUG
+		std::cout << "Level settled after " << this->m_levelSettleTime << " seconds." << std::endl;
+
+		// Load the first bird now that the level has settled.
+		this->loadNextBird();
+	}
+}
+
 void ScenePhysics::createSlingshot()
 {
 	// Slingshot Physics Object
@@ -374,7 +413,6 @@ void ScenePhysics::createSlingshot()
 
 	// Start with a full set of bird projectiles and load the first one.
 	this->m_birdsRemaining = this->m_maxBirds;
-	this->loadNextBird();
 }
 
 void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health)
