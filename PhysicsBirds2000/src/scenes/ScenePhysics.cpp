@@ -231,9 +231,6 @@ void ScenePhysics::update(StateContext ctx)
 		this->m_slingshot->update(timeStep);
 	}
 
-	// Check if the next bird should be loaded.
-	this->updateBirdLoading(timeStep);
-
 	// Physics World Step
 	this->m_physicsWorld->Step(timeStep, 8, 3);
 
@@ -248,6 +245,13 @@ void ScenePhysics::update(StateContext ctx)
 	{
 		if ((*it)->isMarkedForDestroy())
 		{
+			// Remove from the Non-Owning Enemy Vector (if it is an Enemy)
+			this->m_enemies.erase(
+				std::remove(this->m_enemies.begin(), this->m_enemies.end(), it->get()),
+				this->m_enemies.end()
+			);
+
+			// Destroy the Physics Object
 			it = this->m_physicsObjects.erase(it);
 		}
 		else
@@ -255,6 +259,9 @@ void ScenePhysics::update(StateContext ctx)
 			it++;
 		}
 	}
+
+	// Check if the next bird should be loaded.
+	this->updateBirdLoading(timeStep);
 }
 
 void ScenePhysics::render(StateContext ctx)
@@ -295,19 +302,22 @@ void ScenePhysics::clearPhysicsWorld()
 	// Reset Input State
 	this->m_isLeftClicking = false;
 
-	// Stop callbacks into the scene during cleanup.
+	// Stop callbacks into the scene during cleanup
 	if (this->m_physicsWorld != nullptr)
 	{
 		this->m_physicsWorld->SetContactListener(nullptr);
 	}
 
-	// Destroy the slingshot's joint before its connected bodies.
+	// Delete the Slingshot's joint
 	this->m_slingshot.reset();
 
-	// PhysicsObject destructors still need a valid world.
+	// Clear the Non-Owning Ememies Vector
+	this->m_enemies.clear();
+
+	// Delete and clear the Physics Object Vector
 	this->m_physicsObjects.clear();
 
-	// Destroy the world after all owned physics objects.
+	// Reset the world after clearig all Physics Objects
 	this->m_physicsWorld.reset();
 	this->m_contactListener.reset();
 }
@@ -352,6 +362,21 @@ void ScenePhysics::loadAssets()
 	this->m_plankSprite = std::make_shared<sf::Sprite>(this->m_plankTexture);
 }
 
+void ScenePhysics::createSlingshot()
+{
+	// Slingshot Physics Object
+	this->m_slingshot = std::make_unique<Slingshot>(
+		this->m_slingshotSprite,
+		b2Vec2(0.6f, 3.0f),
+		b2Vec2(5.0f, 12.5f),
+		this->m_physicsWorld.get()
+	);
+
+	// Start with a full set of bird projectiles and load the first one.
+	this->m_birdsRemaining = this->m_maxBirds;
+	this->loadNextBird();
+}
+
 void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health)
 {
 	// Create the Plank Physics Object
@@ -368,25 +393,24 @@ void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health
 	)->setHealth(health);
 }
 
-void ScenePhysics::createSlingshot()
+void ScenePhysics::createEnemyPig(b2Vec2 position, float health)
 {
-	// Slingshot Physics Object
-	this->m_slingshot = std::make_unique<Slingshot>(
-		this->m_slingshotSprite,
-		b2Vec2(0.6f, 3.0f),
-		b2Vec2(5.0f, 12.5f),
+	// Create the Enemy Physics Object
+	auto enemy = std::make_unique<PhysicsObject>(
+		b2Shape::e_circle,
+		this->m_pigSprite,
+		b2Vec2(1.0f, 1.0f),
+		position,
+		sf::degrees(0.0f),
+		b2BodyType::b2_dynamicBody,
 		this->m_physicsWorld.get()
 	);
 
-	// Start with a full set of bird projectiles and load the first one.
-	this->m_birdsRemaining = this->m_maxBirds;
-	this->loadNextBird();
-}
+	enemy->setHealth(health);
 
-void ScenePhysics::resetLevel()
-{
-	// Simply rebuild the level
-	this->createPhysicsWorld();
+	// Track the Enemy, the scene owns it and the list only borrows it.
+	this->m_enemies.push_back(enemy.get());
+	this->m_physicsObjects.emplace_back(std::move(enemy));
 }
 
 void ScenePhysics::loadNextBird()
@@ -426,7 +450,7 @@ void ScenePhysics::loadNextBird()
 
 void ScenePhysics::updateBirdLoading(float timeStep)
 {
-	// Only track a bird that has actually been launched.
+	// Only track a Bird Projectile that has actually been launched
 	if (this->m_activeBird == nullptr || this->m_slingshot == nullptr) return;
 	if (this->m_activeBird->getState() != BirdProjectile::State::Flying) return;
 
@@ -436,7 +460,7 @@ void ScenePhysics::updateBirdLoading(float timeStep)
 	const b2Vec2 birdPosition = birdBody->GetPosition();
 	const float birdSpeed = birdBody->GetLinearVelocity().Length();
 
-	// Track how long the bird has been nearly still.
+	// Track how long the Bird Projectile has been nearly still
 	if (birdSpeed < this->m_stillSpeed)
 	{
 		this->m_birdStillTime += timeStep;
@@ -446,11 +470,11 @@ void ScenePhysics::updateBirdLoading(float timeStep)
 		this->m_birdStillTime = 0.0f;
 	}
 
-	// Check if ther bird is still and has therefore settled
+	// Check if the Bird Projectile is still and has therefore settled
 	const bool hasSettled = this->m_birdFlightTime >= this->m_minFlightTime &&
 		(this->m_birdStillTime >= this->m_requiredStillTime || birdBody->IsAwake() == false);
 
-	// Check if the bird is within the screen
+	// Check if the Bird Projectile is within the screen
 	const bool isOutOfBounds = birdPosition.x < -5.0f || birdPosition.x > 35.0f || birdPosition.y > 25.0f;
 
 	// Safety Timer to prevent infinite waiting
@@ -459,10 +483,37 @@ void ScenePhysics::updateBirdLoading(float timeStep)
 	// Check all if any of the conditions are met
 	if (hasSettled == true || isOutOfBounds == true || hasTimedOut == true)
 	{
-		// The spent bird stays in the scene, so only stop tracking it.
+		// Stop tracking the recently launched Bird Projectile
 		this->m_activeBird = nullptr;
 
-		// Load the next bird.
+		// Check how many Enemies remain before loading the next Bird Projectile
+		this->checkEnemiesRemaining();
+		if (this->m_enemies.empty() == true) return;
+
+		// Load the next bird
 		this->loadNextBird();
 	}
+}
+
+void ScenePhysics::checkEnemiesRemaining()
+{
+	// DEBUG
+	std::cout << "Enemies remaining: " << this->m_enemies.size() << std::endl;
+
+	if (this->m_enemies.empty() == true)
+	{
+		// DEBUG
+		std::cout << "All enemies defeated! Level complete." << std::endl;
+
+		// TODO: Go to the next level or show the win screen.
+
+		this->m_activeBird = nullptr;
+		return;
+	}
+}
+
+void ScenePhysics::resetLevel()
+{
+	// Simply rebuild the level
+	this->createPhysicsWorld();
 }
