@@ -27,6 +27,9 @@ PhysicsContactListener::~PhysicsContactListener()
 
 void PhysicsContactListener::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
+	// Ignore impacts while the level is still settling after loading
+	if (this->m_physicsScene->isLevelSettling() == true) return;
+
 	// Convert local contact points to world space contacts
 	b2WorldManifold worldManifold;
 	contact->GetWorldManifold(&worldManifold);
