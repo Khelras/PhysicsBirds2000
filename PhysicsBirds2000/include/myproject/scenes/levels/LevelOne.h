@@ -20,7 +20,8 @@ class LevelOne : public ScenePhysics
 {
 private:
 	// -- Level One Properties -- //
-
+	PhysicsObject* m_hangingPlatform = nullptr;   // Non-owning, the scene owns the plank
+	b2Vec2 m_ropeAnchorPosition = b2Vec2(0.0f, 0.0f);
 	// -- //
 
 public:
@@ -38,4 +39,13 @@ public:
 	///     Create the Box2D Physics World.
 	/// </summary>
 	void createPhysicsWorld() override;
+
+// PRIVATE HELPER FUNCTIONS
+private:
+	/// <summary>
+	/// 	Create a lever.
+	/// </summary>
+	/// 
+	/// <param name="position">2D position vector.</param>
+	void createLever(b2Vec2 position);
 };
