@@ -32,4 +32,8 @@ void LevelOne::createPhysicsWorld()
 	this->createPlank(b2Vec2(15.0f, 8.0f), sf::degrees(0.0f));
 	this->createPlank(b2Vec2(16.0f, 6.0f), sf::degrees(90.0f));
 	this->createPlank(b2Vec2(17.0f, 8.0f), sf::degrees(0.0f));
+
+	// Create Enemy Piggies
+	this->createEnemyPig(b2Vec2(16.0f, 13.4f));
+	this->createEnemyPig(b2Vec2(16.0f, 9.2f));
 }
