@@ -43,6 +43,8 @@ public:
 private:
     // -- Bird Projectile Properties -- //
     State m_state = State::Loaded;
+    std::function<void(BirdProjectile&)> m_ability;
+    bool m_hasUsedAbility = false;
     // -- //
 
 public:
@@ -95,6 +97,24 @@ public:
     /// </returns>
     State getState() const { return m_state; }
 
-    // Override in specialised bird classes later.
-    virtual void activateAbility() {}
+    /// <summary>
+    ///     Set the ability of this bird projectile.
+    /// </summary>
+    /// 
+    /// <param name="ability">A function, lambda, or functor taking this bird projectile as a parameter.</param>
+    inline void setAbility(std::function<void(BirdProjectile&)> ability)
+    {
+        this->m_ability = std::move(ability);
+    };
+
+    /// <summary>
+    ///     Activate the bird projectile's unique ability.
+    ///     The ability can only be activated once and during flight.
+    /// </summary>
+    /// 
+    /// <returns>
+    ///     True if the ability activated successfully.
+    ///     False otherwise.
+    /// </returns>
+    bool activateAbility();
 };

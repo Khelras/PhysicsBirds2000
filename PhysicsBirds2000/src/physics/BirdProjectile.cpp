@@ -77,3 +77,17 @@ void BirdProjectile::finishLaunch()
     this->m_body->SetGravityScale(1.0f);
     this->m_state = BirdProjectile::State::Flying;
 }
+
+bool BirdProjectile::activateAbility()
+{
+    // Abilities can only be used once and only while the bird is in flight
+    if (this->m_state != State::Flying || this->m_hasUsedAbility == true) return false;
+
+    // Check there is an ability to execute
+    if (this->m_ability == nullptr) return false;
+
+    // Use the Ability
+    this->m_hasUsedAbility = true;
+    this->m_ability(*this);
+    return true;
+}

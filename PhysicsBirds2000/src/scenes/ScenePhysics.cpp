@@ -55,6 +55,9 @@ void ScenePhysics::registerCommands()
         // Command Action
         [this](const CommandContext& ctx)
         {
+			// Ensure a Slingshot exists
+			if (this->m_slingshot == nullptr) return;
+
 			// Check if the Level is still settling
 			if (this->m_isLevelSettling == true) return;
 
@@ -69,8 +72,6 @@ void ScenePhysics::registerCommands()
 
 			// Only track a drag if the player clicked the bird.
 			this->m_isLeftClicking = this->m_slingshot->beginDrag(physicsPosition);
-
-			std::cout << (this->m_isLeftClicking ? "mouse dragging" : "not dragging") << std::endl;
         }
     });
     // -- //
@@ -93,6 +94,12 @@ void ScenePhysics::registerCommands()
         // Command Action
 		[this](const CommandContext& ctx)
 		{
+			// Ensure a Slingshot exists
+			if (this->m_slingshot == nullptr) return;
+
+			// Only release if a drag was actually started
+			if (this->m_isLeftClicking == false) return;
+
 			// Convert the Mouse Position to World Coordinates.
 			const sf::Vector2f mousePosition = ctx.window->mapPixelToCoords(sf::Mouse::getPosition(*ctx.window));
 
@@ -129,8 +136,40 @@ void ScenePhysics::registerCommands()
         // Command Action
         [this](const CommandContext& ctx)
         {
+			// Check if there is an Active Bird Projectile
+			if (this->m_activeBird != nullptr)
+			{
+				// Active Bird Projectile Ability
+				if (this->m_activeBird->activateAbility() == true)
+				{
+					// DEBUG
+					std::cout << "Space Key pressed, Bird Projectile ability activated." << std::endl;
+				}
+			}
+        }
+    });
+    // -- //
+
+	// -- R Key Pressed -- //
+    this->m_commands.push_back({
+        // Execution Criteria
+        [](const sf::Event& event)
+        {
+			// First check if the Event was a Key Press, then check if the Key was the R Key
+            if (const auto* key = event.getIf<sf::Event::KeyPressed>())
+            {
+                return key->code == sf::Keyboard::Key::R;
+            }
+
+            // Otherwise, the event does not match the criteria.
+            return false;
+        },
+
+        // Command Action
+        [this](const CommandContext& ctx)
+        {
             // DEBUG
-            std::cout << "Space Key pressed, resetting the current level." << std::endl;
+            std::cout << "R Key pressed, resetting the current level." << std::endl;
 
             // Reset the Current Level
             this->resetLevel();
@@ -472,12 +511,34 @@ void ScenePhysics::loadNextBird()
 	const BirdType birdType = this->m_birdStack.back();
 	this->m_birdStack.pop_back();
 
-	// Bird Projectile
+	// Create Bird Projectile
 	auto bird = std::make_unique<BirdProjectile>(
 		this->getBirdSprite(birdType),
 		this->m_slingshot->getAnchorPosition(),
 		this->m_physicsWorld.get()
 	);
+
+	// Set the Ability
+	switch (birdType)
+	{
+		// Red Bird
+		case (BirdType::Red): break; // The Red Bird has no ability.
+
+		// Yellow Bird
+		case (BirdType::Yellow):
+		{
+			// TODO: Speed Boost
+		} break;
+
+		// Green Bird
+		case (BirdType::Green):
+		{
+			// TODO: Split into multiple birds.
+		} break;
+
+		// Default
+		default: break;
+	}
 
 	// Attach the bird using the distance joint.
 	this->m_slingshot->loadBird(*bird);
