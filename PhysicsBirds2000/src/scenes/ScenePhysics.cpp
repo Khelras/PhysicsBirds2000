@@ -234,7 +234,7 @@ void ScenePhysics::createPhysicsWorld()
 	this->clearPhysicsWorld();
 
 	// Create the Physics World
-	this->m_physicsWorld = std::make_unique<b2World>(b2Vec2(0.0f, 9.81f));
+	this->m_physicsWorld = std::make_unique<b2World>(pl::gravity);
 	this->m_contactListener = std::make_unique<PhysicsContactListener>(this->m_physicsWorld.get(), this);
 	this->m_physicsWorld->SetContactListener(this->m_contactListener.get());
 
@@ -243,8 +243,8 @@ void ScenePhysics::createPhysicsWorld()
 		std::make_unique<PhysicsObject>(
 			b2Shape::e_polygon,
 			this->m_groundSprite,
-			b2Vec2(30.0f, 2.0f),
-			b2Vec2(15.0f, 15.0f),
+			b2Vec2(28.5f, 1.5f), // Ground size
+			b2Vec2(14.25f, 15.25f), // Ground position
 			sf::degrees(0.0f),
 			b2BodyType::b2_staticBody,
 			this->m_physicsWorld.get()
@@ -448,8 +448,8 @@ void ScenePhysics::createSlingshot()
 	// Slingshot Physics Object
 	this->m_slingshot = std::make_unique<Slingshot>(
 		this->m_slingshotSprite,
-		b2Vec2(0.6f, 3.0f),
-		b2Vec2(3.5f, 12.5f),
+		b2Vec2(0.45f, 2.25f),
+		b2Vec2(3.75f, 13.375f),
 		this->m_physicsWorld.get()
 	);
 
@@ -464,7 +464,7 @@ void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health
 		std::make_unique<PhysicsObject>(
 			b2Shape::e_polygon,
 			this->m_plankSprite,
-			b2Vec2(0.5f, 3.0f),
+			b2Vec2(0.375f, 2.25f),
 			position,
 			rotation,
 			b2BodyType::b2_dynamicBody,
@@ -479,7 +479,7 @@ void ScenePhysics::createEnemyPig(b2Vec2 position, float health)
 	auto enemy = std::make_unique<PhysicsObject>(
 		b2Shape::e_circle,
 		this->m_pigSprite,
-		b2Vec2(1.0f, 1.0f),
+		b2Vec2(0.8f, 0.75f),
 		position,
 		sf::degrees(0.0f),
 		b2BodyType::b2_dynamicBody,
@@ -581,8 +581,8 @@ void ScenePhysics::drawBirdQueue(sf::RenderWindow& window) const
 		// Scale of the Sprite (birds are 1 metre wide, matching the BirdProjectile)
 		const sf::Vector2u textureSize = sprite->getTexture().getSize();
 		const sf::Vector2f spriteScale(
-			1.0f * pl::sizeScale / static_cast<float>(textureSize.x),
-			1.0f * pl::sizeScale / static_cast<float>(textureSize.y)
+			0.75f * pl::sizeScale / static_cast<float>(textureSize.x),
+			0.75f * pl::sizeScale / static_cast<float>(textureSize.y)
 		);
 
 		// Set the Sprite's Scale, Origin, Position, and Rotation
@@ -627,7 +627,7 @@ void ScenePhysics::updateBirdLoading(float timeStep)
 		(this->m_birdStillTime >= this->m_requiredStillTime || birdBody->IsAwake() == false);
 
 	// Check if the Bird Projectile is within the screen
-	const bool isOutOfBounds = birdPosition.x < -5.0f || birdPosition.x > 35.0f || birdPosition.y > 25.0f;
+	const bool isOutOfBounds = birdPosition.x < -5.0f || birdPosition.x > 30.0f || birdPosition.y > 25.0f;
 
 	// Safety Timer to prevent infinite waiting
 	const bool hasTimedOut = this->m_birdFlightTime >= this->m_maxFlightTime;

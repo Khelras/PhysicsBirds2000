@@ -86,7 +86,7 @@ bool Slingshot::beginDrag(b2Vec2 mousePosition)
     const b2Vec2 offset = mousePosition - this->m_bird->getBody()->GetPosition();
 
     // Ensure the offset point is within a click radius
-    const float clickRadius = 0.65f;
+    const float clickRadius = 0.5f;
     if (offset.LengthSquared() > clickRadius * clickRadius)
     {
         return false;
@@ -138,7 +138,7 @@ void Slingshot::applyDragForce()
     b2Vec2 acceleration = positionGain * positionError - velocityGain * velocity;
 
     // Prevent extreme cursor positions from producing huge forces
-    const float maximumAcceleration = 150.0f;
+    const float maximumAcceleration = 100.0f;
     const float accelerationLength = acceleration.Length();
     if (accelerationLength > maximumAcceleration)
     {
@@ -191,7 +191,7 @@ void Slingshot::update(float deltaTime)
 
     // Detach near the anchor, or after a safety timeout.
     const b2Vec2 offset = this->m_bird->getBody()->GetPosition() - this->getAnchorPosition();
-    const float releaseDistance = 0.35f;
+    const float releaseDistance = 0.3f;
     if (offset.LengthSquared() <= releaseDistance * releaseDistance || this->m_launchTime >= 0.35f)
     {
         this->destroyJoint();

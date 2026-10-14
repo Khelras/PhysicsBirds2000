@@ -13,7 +13,7 @@ Mail        : angelo.bohol@mds.ac.nz
 #include "myproject/physics/BirdProjectile.h"
 
 BirdProjectile::BirdProjectile(std::shared_ptr<sf::Sprite> sprite, b2Vec2 position, b2World* physicsWorld)
-	: PhysicsObject(b2Shape::e_circle, sprite, b2Vec2(1.0f, 1.0f), position, sf::degrees(0.0f), b2_kinematicBody, physicsWorld)
+	: PhysicsObject(b2Shape::e_circle, sprite, b2Vec2(0.75f, 0.75f), position, sf::degrees(0.0f), b2_kinematicBody, physicsWorld)
 {
     this->m_body->SetFixedRotation(true);
     this->m_body->SetBullet(true);

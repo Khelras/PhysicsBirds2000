@@ -61,16 +61,16 @@ protected:
     BirdProjectile* m_activeBird = nullptr;
     std::vector<BirdType> m_birdStack;
 
-    float m_birdQueueOffsetX = 1.5f; // Distance behind the slingshot to the first waiting bird
-    float m_birdQueueSpacing = 1.2f; // Distance between waiting birds
-    float m_birdQueueY = 13.5f; // Resting height (ground top is 14, bird radius is 0.5)
+    float m_birdQueueOffsetX = 1.125f; // Distance behind the slingshot to the first waiting bird
+    float m_birdQueueSpacing = 0.9f; // Distance between waiting birds
+    float m_birdQueueY = 14.125f; // Resting height (ground top is 14, bird radius is 0.5)
 
     float m_birdFlightTime = 0.0f;
     float m_birdStillTime = 0.0f;
     float m_minFlightTime = 1.0f;
     float m_maxFlightTime = 8.0f;
     float m_requiredStillTime = 1.0f;
-    float m_stillSpeed = 0.3f;
+    float m_stillSpeed = 0.2f;
 
     std::vector<PhysicsObject*> m_enemies; // Non-Owning
     // -- //

@@ -27,8 +27,8 @@ private:
     float m_launchTime = 0.0f;
     b2Vec2 m_dragTarget = b2Vec2(0.0f, 0.0f);
 
-    float m_maxPullDistance = 2.5f;
-    float m_restLength = 0.15f;
+    float m_maxPullDistance = 2.0f;
+    float m_restLength = 0.1f;
     // -- //
 
 public:

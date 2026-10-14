@@ -24,16 +24,16 @@ void LevelOne::createPhysicsWorld()
 	ScenePhysics::createPhysicsWorld();
 
 	// Extend Functionality
-	// Create Planks
-	this->createPlank(b2Vec2(18.0f, 12.5f), sf::degrees(0.0f));
-	this->createPlank(b2Vec2(19.0f, 10.75f), sf::degrees(90.0f));
-	this->createPlank(b2Vec2(20.0f, 12.5f), sf::degrees(0.0f));
+	// Create PLanks
+	this->createPlank(b2Vec2(18.25f, 13.375f), sf::degrees(0.0f));
+	this->createPlank(b2Vec2(19.75f, 13.375f), sf::degrees(0.0f));
+	this->createPlank(b2Vec2(19.0f, 12.0625f), sf::degrees(90.0f));
 
-	this->createPlank(b2Vec2(18.0f, 9.0f), sf::degrees(0.0f));
-	this->createPlank(b2Vec2(19.0f, 7.25f), sf::degrees(90.0f));
-	this->createPlank(b2Vec2(20.0f, 9.0f), sf::degrees(0.0f));
+	this->createPlank(b2Vec2(18.25f, 10.75f), sf::degrees(0.0f));
+	this->createPlank(b2Vec2(19.75f, 10.75f), sf::degrees(0.0f));
+	this->createPlank(b2Vec2(19.0f, 9.4375f), sf::degrees(90.0f));
 
-	// Create Enemy Piggies
-	this->createEnemyPig(b2Vec2(19.0f, 13.5f));
-	this->createEnemyPig(b2Vec2(19.0f, 10.0f));
+	// Create Enemies
+	this->createEnemyPig(b2Vec2(19.0f, 14.125f));
+	this->createEnemyPig(b2Vec2(19.0f, 11.5f));
 }
