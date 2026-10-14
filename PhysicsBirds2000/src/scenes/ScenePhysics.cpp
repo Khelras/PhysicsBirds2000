@@ -317,18 +317,26 @@ void ScenePhysics::loadAssets()
 	// Load the Textures
 	if (this->m_groundTexture.loadFromFile("assets/textures/ground.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/ground.png'" << std::endl;
+
 	//if (this->m_slingshotTexture.loadFromFile("assets/textures/slingshot.png") == false)
 	//	std::cerr << "Error loading texture from 'assets/textures/slingshot.png'" << std::endl;
+
 	if (this->m_redBirdTexture.loadFromFile("assets/textures/red_bird.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/red_bird.png'" << std::endl;
+
 	if (this->m_yellowBirdTexture.loadFromFile("assets/textures/yellow_bird.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/yellow_bird.png'" << std::endl;
+
 	if (this->m_greenBirdTexture.loadFromFile("assets/textures/green_bird.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/green_bird.png'" << std::endl;
+
+	if (this->m_pigTexture.loadFromFile("assets/textures/pig.png") == false)
+		std::cerr << "Error loading texture from 'assets/textures/pig.png'" << std::endl;
+
 	if (this->m_plankTexture.loadFromFile("assets/textures/plank.png") == false)
 		std::cerr << "Error loading texture from 'assets/textures/plank.png'" << std::endl;
 
-	// -- TESTING SLINGSHOT IMAGE TEXTURE -- //
+	// -- SLINGSHOT PLACEHOLDER IMAGE TEXTURE -- //
 	const sf::Image slingshotImage(sf::Vector2u(32u, 128u), sf::Color(130, 75, 35));
 	if (this->m_slingshotTexture.loadFromImage(slingshotImage) == false)
 		throw std::runtime_error("Error creating the slingshot placeholder texture.");
@@ -339,6 +347,8 @@ void ScenePhysics::loadAssets()
 	this->m_groundSprite = std::make_shared<sf::Sprite>(this->m_groundTexture);
 	this->m_redBirdSprite = std::make_shared<sf::Sprite>(this->m_redBirdTexture);
 	this->m_yellowBirdSprite = std::make_shared<sf::Sprite>(this->m_yellowBirdTexture);
+	this->m_greenBirdSprite = std::make_shared<sf::Sprite>(this->m_greenBirdTexture);
+	this->m_pigSprite = std::make_shared<sf::Sprite>(this->m_pigTexture);
 	this->m_plankSprite = std::make_shared<sf::Sprite>(this->m_plankTexture);
 }
 
@@ -436,16 +446,17 @@ void ScenePhysics::updateBirdLoading(float timeStep)
 		this->m_birdStillTime = 0.0f;
 	}
 
-	// Settled: nearly still for long enough, or Box2D put the body to sleep.
+	// Check if ther bird is still and has therefore settled
 	const bool hasSettled = this->m_birdFlightTime >= this->m_minFlightTime &&
 		(this->m_birdStillTime >= this->m_requiredStillTime || birdBody->IsAwake() == false);
 
-	// Out of Bounds: the bird has left the play area.
+	// Check if the bird is within the screen
 	const bool isOutOfBounds = birdPosition.x < -5.0f || birdPosition.x > 35.0f || birdPosition.y > 25.0f;
 
-	// Safety Timer: the bird has been in flight for too long.
+	// Safety Timer to prevent infinite waiting
 	const bool hasTimedOut = this->m_birdFlightTime >= this->m_maxFlightTime;
 
+	// Check all if any of the conditions are met
 	if (hasSettled == true || isOutOfBounds == true || hasTimedOut == true)
 	{
 		// The spent bird stays in the scene, so only stop tracking it.

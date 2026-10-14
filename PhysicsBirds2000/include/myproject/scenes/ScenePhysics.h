@@ -35,6 +35,7 @@ protected:
     sf::Texture m_redBirdTexture;
     sf::Texture m_yellowBirdTexture;
     sf::Texture m_greenBirdTexture;
+    sf::Texture m_pigTexture;
     sf::Texture m_plankTexture;
 
     // Sprites
@@ -42,6 +43,8 @@ protected:
     std::shared_ptr<sf::Sprite> m_slingshotSprite;
     std::shared_ptr<sf::Sprite> m_redBirdSprite;
     std::shared_ptr<sf::Sprite> m_yellowBirdSprite;
+    std::shared_ptr<sf::Sprite> m_greenBirdSprite;
+    std::shared_ptr<sf::Sprite> m_pigSprite;
     std::shared_ptr<sf::Sprite> m_plankSprite;
 
     // Physics
