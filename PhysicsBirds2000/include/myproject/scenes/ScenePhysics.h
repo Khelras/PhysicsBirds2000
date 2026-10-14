@@ -35,6 +35,7 @@ protected:
     sf::Texture m_redBirdTexture;
     sf::Texture m_yellowBirdTexture;
     sf::Texture m_greenBirdTexture;
+    sf::Texture m_pigTexture;
     sf::Texture m_plankTexture;
 
     // Sprites
@@ -42,6 +43,8 @@ protected:
     std::shared_ptr<sf::Sprite> m_slingshotSprite;
     std::shared_ptr<sf::Sprite> m_redBirdSprite;
     std::shared_ptr<sf::Sprite> m_yellowBirdSprite;
+    std::shared_ptr<sf::Sprite> m_greenBirdSprite;
+    std::shared_ptr<sf::Sprite> m_pigSprite;
     std::shared_ptr<sf::Sprite> m_plankSprite;
 
     // Physics
@@ -58,11 +61,12 @@ protected:
 
     float m_birdFlightTime = 0.0f;
     float m_birdStillTime = 0.0f;
-
     float m_minFlightTime = 1.0f;
     float m_maxFlightTime = 8.0f;
     float m_requiredStillTime = 1.0f;
     float m_stillSpeed = 0.3f;
+
+    std::vector<PhysicsObject*> m_enemies; // Non-Owning
     // -- //
 
 public:
@@ -126,6 +130,11 @@ protected:
     virtual void loadAssets();
 
     /// <summary>
+    ///     Create the slingshot and load its initial projectile.
+    /// </summary>
+    void createSlingshot();
+
+    /// <summary>
 	///     Create a plank physics object at the given position and rotation.
     /// </summary>
     /// 
@@ -135,9 +144,11 @@ protected:
     void createPlank(b2Vec2 position, sf::Angle rotation, float health = 25.0f);
 
     /// <summary>
-    ///     Create the slingshot and load its initial projectile.
+    ///     Create a enemy pig physics object at the given position.
     /// </summary>
-    void createSlingshot();
+    /// <param name="position">2D position vector to spawn the enemy pig.</param>
+    /// <param name="health">Total health of the enemy pig (default to 15).</param>
+    void createEnemyPig(b2Vec2 position, float health = 15);
 
     /// <summary>
     ///     Load the next bird projectile onto the slingshot.
@@ -149,6 +160,11 @@ protected:
     ///     If so, load the next bird projectile onto the slingshot.
     /// </summary>
     void updateBirdLoading(float timeStep);
+
+    /// <summary>
+    ///     Check how many enemies remain in the scene and log the level progress.
+    /// </summary>
+    void checkEnemiesRemaining();
 
     /// <summary>
     ///     Destroy the current physics world and rebuild this level.
