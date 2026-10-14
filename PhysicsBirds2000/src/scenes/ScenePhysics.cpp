@@ -375,13 +375,10 @@ void ScenePhysics::updateLevelSettling(float timeStep)
 
 	this->m_levelSettleTime += timeStep;
 
-	// Loop through every dynamic body (except the loaded Bird Projectile) and check if it has fallen asleep
+	// Loop through every dynamic body and check if it has fallen asleep
 	bool isAtRest = true;
 	for (b2Body* body = this->m_physicsWorld->GetBodyList(); body != nullptr; body = body->GetNext())
 	{
-		// Ignore the loaded Bird Projectile
-		if (this->m_activeBird != nullptr && body == this->m_activeBird->getBody()) continue;
-
 		// Check if this dynamic body is awake
 		if (body->GetType() == b2BodyType::b2_dynamicBody && body->IsAwake() == true)
 		{
@@ -398,6 +395,9 @@ void ScenePhysics::updateLevelSettling(float timeStep)
 
 		// DEBUG
 		std::cout << "Level settled after " << this->m_levelSettleTime << " seconds." << std::endl;
+
+		// Load the first bird now that the level has settled.
+		this->loadNextBird();
 	}
 }
 
@@ -413,7 +413,6 @@ void ScenePhysics::createSlingshot()
 
 	// Start with a full set of bird projectiles and load the first one.
 	this->m_birdsRemaining = this->m_maxBirds;
-	this->loadNextBird();
 }
 
 void ScenePhysics::createPlank(b2Vec2 position, sf::Angle rotation, float health)
