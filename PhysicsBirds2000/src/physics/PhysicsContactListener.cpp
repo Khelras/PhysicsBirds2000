@@ -60,7 +60,6 @@ void PhysicsContactListener::PreSolve(b2Contact* contact, const b2Manifold* oldM
 			// Check if the Physics Object's body is either body A or B
 			if (physicsObject->getBody() == bodyA || physicsObject->getBody() == bodyB)
 			{
-				std::cout << approachVelocity << std::endl;
 				physicsObject->receiveImpact(approachVelocity);
 			}
 		}

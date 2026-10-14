@@ -3,7 +3,7 @@ Bachelor of Software Engineering
 Media Design School
 Auckland
 New Zealand
-(c) 2026 Media Design School
+(c) 2026 Media Design Schools
 File Name   : BirdProjectile.cpp
 Description : Defines the BirdProjectile Class Functions and Properties.
 Author      : Angelo Joseph Arawiran Bohol
@@ -11,17 +11,21 @@ Mail        : angelo.bohol@mds.ac.nz
 **************************************************************************/
 
 #include "myproject/physics/BirdProjectile.h"
+#include "myproject/physics/PhysicsLibrary.h"
 
 BirdProjectile::BirdProjectile(std::shared_ptr<sf::Sprite> sprite, b2Vec2 position, b2World* physicsWorld)
-	: PhysicsObject(b2Shape::e_circle, sprite, b2Vec2(0.75f, 0.75f), position, sf::degrees(0.0f), b2_kinematicBody, physicsWorld)
+	: PhysicsObject(b2Shape::e_circle, sprite, pl::birdSize, position, sf::degrees(0.0f), b2_kinematicBody, physicsWorld)
 {
     this->m_body->SetFixedRotation(true);
     this->m_body->SetBullet(true);
     this->m_body->SetGravityScale(0.0f);
     
-    // Bird has 500 health
-    this->m_isIndustructible = true; // Prevents the Slingshot from damaging the bird
-    this->m_health = 500.0f;
+    // Bird Projectiles big HP
+    this->m_isIndustructible = true; // Prevents the Slingshot from damaging the 
+    this->m_health = 250.0f;
+
+    // Bird Projectiles do not collide with other Birds Projectiles
+    pl::setBirdCollisionFilter(this->getBody());
 }
 
 BirdProjectile::~BirdProjectile()

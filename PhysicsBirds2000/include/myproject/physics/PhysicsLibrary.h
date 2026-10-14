@@ -25,4 +25,35 @@ namespace pl
 	///		Pointing downwards with a magnitude of 9.81 m/s².
 	/// </summary>
 	const inline b2Vec2 gravity(0.0f, 9.81f);
+
+	/// <summary>
+	///		The size of a Bird Projectile in Box2D metres.
+	/// </summary>
+	const inline b2Vec2 birdSize(0.75f, 0.75f);
+
+	/// <summary>
+	///		Collision category bits.
+	/// </summary>
+	namespace category
+	{
+		constexpr uint16 defaultBits = 0x0001;
+		constexpr uint16 bird = 0x0002;
+	}
+
+	/// <summary>
+	///		Set the collision filter of every fixture on the given body so it is a Bird.
+	///		Birds collide with everything except other Birds.
+	/// </summary>
+	/// 
+	/// <param name="body">The body to filter.</param>
+	inline void setBirdCollisionFilter(b2Body* body)
+	{
+		for (b2Fixture* fixture = body->GetFixtureList(); fixture != nullptr; fixture = fixture->GetNext())
+		{
+			b2Filter filter = fixture->GetFilterData();
+			filter.categoryBits = category::bird;
+			filter.maskBits = static_cast<uint16>(0xFFFF & ~category::bird);
+			fixture->SetFilterData(filter);
+		}
+	}
 }

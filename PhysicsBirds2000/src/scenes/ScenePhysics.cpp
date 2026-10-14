@@ -359,8 +359,9 @@ void ScenePhysics::clearPhysicsWorld()
 	// Delete the Slingshot's joint
 	this->m_slingshot.reset();
 
-	// Clear the Non-Owning Ememies Vector
+	// Clear the any Non-Owning Vectors
 	this->m_enemies.clear();
+	this->m_extraBirds.clear();
 
 	// Delete and clear the Physics Object Vector
 	this->m_physicsObjects.clear();
@@ -538,7 +539,11 @@ void ScenePhysics::loadNextBird()
 		// Green Bird
 		case (BirdType::Green):
 		{
-			// TODO: Split into multiple birds.
+			// Split into multiple Bird Projectiles
+			bird->setAbility([this](BirdProjectile& self)
+			{
+				this->splitBird(self);
+			});
 		} break;
 
 		// Default
@@ -637,8 +642,19 @@ void ScenePhysics::updateBirdLoading(float timeStep)
 	// Safety Timer to prevent infinite waiting
 	const bool hasTimedOut = this->m_birdFlightTime >= this->m_maxFlightTime;
 
+	// Any extra Bird Projectiles must also have come to rest.
+	bool extraBirdsAtRest = true;
+	for (PhysicsObject* extraBird : this->m_extraBirds)
+	{
+		if (this->isBirdAtRest(extraBird->getBody()) == false)
+		{
+			extraBirdsAtRest = false;
+			break;
+		}
+	}
+
 	// Check all if any of the conditions are met
-	if (hasSettled == true || isOutOfBounds == true || hasTimedOut == true)
+	if (((hasSettled == true || isOutOfBounds == true) && extraBirdsAtRest == true) || hasTimedOut == true)
 	{
 		// Stop tracking the recently launched Bird Projectile
 		this->m_activeBird = nullptr;
@@ -673,4 +689,58 @@ void ScenePhysics::resetLevel()
 {
 	// Simply rebuild the level
 	this->createPhysicsWorld();
+}
+
+void ScenePhysics::splitBird(BirdProjectile& bird)
+{
+	b2Body* birdBody = bird.getBody();
+	const b2Vec2 position = birdBody->GetPosition();
+	const b2Vec2 velocity = birdBody->GetLinearVelocity();
+
+	// The original bird keeps its trajectory, the two new birds fan out either side of it.
+	const float splitAngle = sf::degrees(this->m_splitAngle).asRadians();
+	const float angles[2] = { splitAngle, -splitAngle };
+
+	for (float angle : angles)
+	{
+		// Split Bird Physics Object
+		auto splitBird = std::make_unique<PhysicsObject>(
+			b2Shape::e_circle,
+			this->m_greenBirdSprite,
+			pl::birdSize,
+			position,
+			sf::degrees(0.0f),
+			b2BodyType::b2_dynamicBody,
+			this->m_physicsWorld.get()
+		);
+
+		splitBird->setHealth(500.0f, true);
+
+		b2Body* splitBody = splitBird->getBody();
+		splitBody->SetFixedRotation(true);
+		splitBody->SetBullet(true);
+
+		// Rotate the original Bird Projectile's velocity to change the trajectory.
+		splitBody->SetLinearVelocity(b2Mul(b2Rot(angle), velocity));
+
+		// Split birds do not collide with any other Bird Projectiles.
+		pl::setBirdCollisionFilter(splitBody);
+
+		// Track the split Bird Projectile, the scene owns it and the list only borrows it.
+		this->m_extraBirds.push_back(splitBird.get());
+		this->m_physicsObjects.emplace_back(std::move(splitBird));
+	}
+
+	// DEBUG
+	std::cout << "Green Bird split into three birds." << std::endl;
+}
+
+bool ScenePhysics::isBirdAtRest(b2Body * birdBody) const
+{
+	const b2Vec2 position = birdBody->GetPosition();
+	const bool isOutOfBounds = position.x < -3.75f || position.x > 26.25f || position.y > 22.75f;
+
+	return (isOutOfBounds == true) ||
+		(birdBody->IsAwake() == false) ||
+		(birdBody->GetLinearVelocity().Length() < this->m_stillSpeed);
 }

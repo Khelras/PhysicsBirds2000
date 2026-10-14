@@ -201,4 +201,24 @@ protected:
     ///     Destroy the current physics world and rebuild this level.
     /// </summary>
     virtual void resetLevel();
+
+// PROTECTED HELPER FOR THE GREEN BIRD
+protected:
+    // Non-owning list of extra Bird Projectiles spawned.
+    std::vector<PhysicsObject*> m_extraBirds;
+    float m_splitAngle = 15.0f; // Degrees between the split Bird Projectiles trajectories
+
+    /// <summary>
+    ///     Split the given bird into three birds with different trajectories.
+    /// </summary>
+    /// 
+    /// <param name="bird">The bird that is splitting.</param>
+    void splitBird(BirdProjectile& bird);
+
+    /// <summary>
+    ///     Check whether a bird body has come to rest, left the play area, or fallen asleep.
+    /// </summary>
+    /// 
+    /// <param name="birdBody">The bird's body.</param>
+    bool isBirdAtRest(b2Body* birdBody) const;
 };
